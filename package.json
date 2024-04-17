@@ -1,5 +1,4 @@
 {
-  "type": "module",
   "name": "shortenurl",
   "version": "0.1.0",
   "private": true,
