@@ -43,14 +43,14 @@ function App() {
           />
         </Toolbar>
       </AppBar>
-      <Container sx={{ padding: 10 }}>
+      <Container sx={{ paddingTop: 10, height: 100 }}>
         <Card sx={{ minWidth: 375 }}>
           <Typography sx={{ fontSize: 14 }}>URL Shortener.</Typography>
         </Card>
       </Container>
       <BottomAppBar position="fixed" elevation={0}>
         <Toolbar sx={{ justifyContent: "center" }}>
-          <Typography variant="h10" color="primary">
+          <Typography variant="h10" color="">
             Copyright 2024. j1n.uk
           </Typography>
         </Toolbar>
