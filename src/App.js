@@ -3,7 +3,7 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { Box, Container } from "@mui/material";
+import { Box, Container, Link } from "@mui/material";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/system";
@@ -33,14 +33,16 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <AppBar position="static" elevation={0}>
         <Toolbar sx={{ justifyContent: "center" }}>
-          <Box
-            component="img"
-            sx={{
-              width: 120,
-            }}
-            alt="J1N.UK Logo"
-            src={logo}
-          />
+          <Link href="/">
+            <Box
+              component="img"
+              sx={{
+                width: 120,
+              }}
+              alt="J1N.UK Logo"
+              src={logo}
+            />
+          </Link>
         </Toolbar>
       </AppBar>
       <Container sx={{ paddingTop: 10, height: 100 }}>
