@@ -3,35 +3,59 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
+import Card from "@mui/material/Card";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/system";
 
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
+    background: {
+      default: "#f0f0f0", // 배경색 설정
+    },
     primary: {
-      main: "#1976d2",
+      main: "#000000",
     },
   },
 });
 
+// 툴바를 화면 하단에 고정시키는 스타일을 적용한 AppBar 컴포넌트
+const BottomAppBar = styled(AppBar)({
+  top: "auto",
+  bottom: 0,
+  backgroundColor: "#00000000",
+  justifyContent: "center",
+});
+
 function App() {
   return (
-    <React.Fragment>
-      <ThemeProvider theme={darkTheme}>
-        <AppBar position="static" color="primary">
-          <Toolbar sx={{ justifyContent: "center" }}>
-            <Box
-              component="img"
-              sx={{
-                width: 120,
-              }}
-              alt="J1N.UK Logo"
-              src={logo}
-            />
-          </Toolbar>
-        </AppBar>
-      </ThemeProvider>
-    </React.Fragment>
+    <ThemeProvider theme={darkTheme}>
+      <AppBar position="static" elevation={0}>
+        <Toolbar sx={{ justifyContent: "center" }}>
+          <Box
+            component="img"
+            sx={{
+              width: 120,
+            }}
+            alt="J1N.UK Logo"
+            src={logo}
+          />
+        </Toolbar>
+      </AppBar>
+      <Container sx={{ padding: 10 }}>
+        <Card sx={{ minWidth: 375 }}>
+          <Typography sx={{ fontSize: 14 }}>URL Shortener.</Typography>
+        </Card>
+      </Container>
+      <BottomAppBar position="fixed" elevation={0}>
+        <Toolbar sx={{ justifyContent: "center" }}>
+          <Typography variant="h10" color="primary">
+            Copyright 2024. j1n.uk
+          </Typography>
+        </Toolbar>
+      </BottomAppBar>
+    </ThemeProvider>
   );
 }
 
