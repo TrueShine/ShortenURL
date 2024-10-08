@@ -7,13 +7,11 @@ import { Box, Container, Link } from "@mui/material";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/system";
+import TextField from "@mui/material/TextField";
 
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
-    background: {
-      default: "#f0f0f0", // 배경색 설정
-    },
     primary: {
       main: "#000000",
     },
@@ -48,6 +46,7 @@ function Main() {
       <Container sx={{ paddingTop: 10, height: 100 }}>
         <Card sx={{ minWidth: 375 }}>
           <Typography sx={{ fontSize: 14 }}>URL Shortener.</Typography>
+          <TextField id="outlined-basic" label="Outlined" variant="outlined" />
         </Card>
       </Container>
       <BottomAppBar position="fixed" elevation={0}>

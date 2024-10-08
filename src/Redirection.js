@@ -13,9 +13,10 @@ function Redirection() {
   //   // 쿼리 매개변수 값 가져오기
   //   const paramValue = queryParams.get("paramName");
 
-  window.location.href =
-    "https://m.search.naver.com/search.naver?sm=mtp_hty.top&where=m&query=" +
-    currentPath;
+  window.location.replace(
+      "https://m.search.naver.com/search.naver?sm=mtp_hty.top&where=m&query=" +
+      currentPath
+  );
 
   // TODO: 통계?
 
