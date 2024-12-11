@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="743c2e5f-39f2-4eaa-897a-81c3594ec74d" name="Changes" comment="Changes">
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shortenurl.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/firebase-debug.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Redirection.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Redirection.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,9 +38,10 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Node.js.App.js.executor&quot;: &quot;Debug&quot;,
+    &quot;Node.js.App.js.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/jinukryu/Documents/workspace/shortenurl&quot;,
@@ -53,7 +51,7 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/jinukryu/Applications/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/jinukryu/Applications/WebStorm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -73,7 +71,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-WS-242.20224.342" />
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
       </set>
     </attachedChunks>
   </component>
@@ -88,7 +86,20 @@
       <workItem from="1712031980404" duration="2358000" />
       <workItem from="1727421324391" duration="1764000" />
       <workItem from="1727654943234" duration="797000" />
-      <workItem from="1728264062358" duration="4009000" />
+      <workItem from="1728264062358" duration="6250000" />
+      <workItem from="1728520106111" duration="5445000" />
+      <workItem from="1728866419140" duration="4295000" />
+      <workItem from="1729469996698" duration="3550000" />
+      <workItem from="1730074862395" duration="3554000" />
+      <workItem from="1730253113112" duration="2192000" />
+      <workItem from="1730681794870" duration="1912000" />
+      <workItem from="1731286112220" duration="3711000" />
+      <workItem from="1731975358745" duration="506000" />
+      <workItem from="1732078445238" duration="24569000" />
+      <workItem from="1732494244370" duration="21393000" />
+      <workItem from="1732672704946" duration="8547000" />
+      <workItem from="1733183878806" duration="4735000" />
+      <workItem from="1733789540346" duration="1209000" />
     </task>
     <servers />
   </component>
@@ -100,7 +111,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>

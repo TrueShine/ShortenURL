@@ -10,7 +10,7 @@ function Redirection() {
   //   // 쿼리 매개변수
   //   const queryParams = new URLSearchParams(location.search);
 
-  //   // 쿼리 매개변수 값 가져오기
+  //   // 쿼리 매개변 수 값 가져오기
   //   const paramValue = queryParams.get("paramName");
 
   window.location.replace(
