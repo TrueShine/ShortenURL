@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>j1n.uk URL Shortener — Design Mockup</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --color-bg:#FAFAFA;
+    --color-surface:#FFFFFF;
+    --color-surface-dim:#F2F2F4;
+    --color-text-primary:#111113;
+    --color-text-secondary:#6B7280;
+    --color-text-disabled:#B0B0B6;
+    --color-border:#E5E7EB;
+    --color-border-strong:#D1D5DB;
+    --color-accent:#4F46E5;
+    --color-accent-hover:#4338CA;
+    --color-accent-subtle:#EEF0FF;
+    --color-success:#16A34A;
+    --color-warning:#D97706;
+    --color-danger:#DC2626;
+    --color-danger-subtle:#FEF2F2;
+    --color-code-bg:#111113;
+    --color-code-text:#F5F5F7;
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --radius-pill:999px;
+    --shadow-sm:0 1px 2px rgba(17,17,19,.04);
+    --shadow-md:0 4px 16px rgba(17,17,19,.08);
+    --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;
+    --space-5:24px;--space-6:24px;--space-7:32px;--space-8:64px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Pretendard","Inter",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+    background:var(--color-bg);
+    color:var(--color-text-primary);
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"JetBrains Mono","SFMono-Regular",Menlo,monospace;}
+
+  /* ---- meta chrome (목업 전용 네비, 실제 제품 UI 아님) ---- */
+  .lab-nav{
+    position:sticky;top:0;z-index:50;
+    background:#111113;color:#fff;
+    display:flex;flex-wrap:wrap;gap:2px;
+    padding:8px;
+  }
+  .lab-nav button{
+    background:transparent;border:0;color:#9CA3AF;
+    padding:8px 12px;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;
+    font-family:inherit;
+  }
+  .lab-nav button.active{background:var(--color-accent);color:#fff;}
+  .lab-state-strip{
+    display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
+    padding:10px 12px;border-bottom:1px dashed var(--color-border-strong);
+    background:#fffbe8;
+  }
+  .lab-state-strip button{
+    font-family:inherit;font-size:12px;font-weight:600;
+    padding:5px 10px;border-radius:var(--radius-pill);
+    border:1px solid var(--color-border-strong);background:#fff;cursor:pointer;color:var(--color-text-secondary);
+  }
+  .lab-state-strip button.active{background:var(--color-text-primary);color:#fff;border-color:var(--color-text-primary);}
+  .lab-state-strip .tag{font-size:11px;color:var(--color-text-disabled);align-self:center;margin-right:4px;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+  .state-panel{display:none;}
+  .state-panel.active{display:block;}
+
+  /* ---- shared UI ---- */
+  .page{min-height:60vh;padding:var(--space-7) var(--space-4) var(--space-8);}
+  .center-col{max-width:480px;margin:0 auto;}
+  .narrow-col{max-width:360px;margin:0 auto;}
+  .wide-col{max-width:960px;margin:0 auto;}
+  .logo{
+    text-align:center;font-weight:700;font-size:15px;letter-spacing:-.02em;
+    margin-bottom:var(--space-7);
+  }
+  .logo span{color:var(--color-accent);}
+  h1.h1{font-size:24px;font-weight:700;line-height:1.3;margin:0 0 4px;text-align:center;}
+  p.sub{font-size:15px;color:var(--color-text-secondary);text-align:center;margin:0 0 24px;}
+  .card{
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-radius:var(--radius-md);box-shadow:var(--shadow-sm);
+    padding:24px;
+  }
+  label.field-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--color-text-primary);}
+  input.field, select.field{
+    width:100%;height:44px;border:1px solid var(--color-border);border-radius:var(--radius-sm);
+    padding:0 14px;font-size:15px;font-family:inherit;background:#fff;color:var(--color-text-primary);
+  }
+  input.field:focus, select.field:focus{
+    outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(79,70,229,.12);
+  }
+  input.field.err{border-color:var(--color-danger);}
+  .helper{font-size:13px;margin-top:6px;color:var(--color-text-secondary);}
+  .helper.err{color:var(--color-danger);}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:44px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;
+    font-family:inherit;cursor:pointer;border:1px solid transparent;padding:0 20px;
+    white-space:nowrap;flex-shrink:0;
+  }
+  .btn-primary{background:var(--color-accent);color:#fff;}
+  .btn-primary:hover{background:var(--color-accent-hover);}
+  .btn-primary[disabled]{background:var(--color-surface-dim);color:var(--color-text-disabled);cursor:not-allowed;}
+  .btn-secondary{background:transparent;border-color:var(--color-border-strong);color:var(--color-text-primary);}
+  .btn-danger{background:transparent;color:var(--color-danger);}
+  .btn-danger:hover{background:var(--color-danger-subtle);}
+  .btn-ghost{background:transparent;color:var(--color-accent);border:0;height:auto;padding:0;font-weight:600;}
+  .btn-block{width:100%;}
+  .field-group{margin-bottom:16px;}
+  .banner{
+    border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;margin-bottom:16px;
+  }
+  .banner-err{background:var(--color-danger-subtle);color:var(--color-danger);}
+  .badge{
+    display:inline-block;font-size:12px;font-weight:500;letter-spacing:.02em;
+    padding:2px 10px;border-radius:var(--radius-pill);
+  }
+  .badge-active{background:var(--color-accent-subtle);color:var(--color-accent);}
+  .badge-expired{background:#F3F4F6;color:var(--color-text-secondary);}
+  .badge-pw{background:#FFF7ED;color:var(--color-warning);}
+  .skeleton{
+    background:linear-gradient(90deg,var(--color-surface-dim) 25%,#e9e9ec 37%,var(--color-surface-dim) 63%);
+    background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:var(--radius-sm);
+  }
+  @keyframes shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+  .spinner{
+    width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;animation:spin .7s linear infinite;
+  }
+  .spinner.dark{border:2px solid rgba(0,0,0,.15);border-top-color:var(--color-text-secondary);}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+  .switch{width:40px;height:24px;border-radius:999px;background:var(--color-border-strong);position:relative;cursor:pointer;flex-shrink:0;}
+  .switch.on{background:var(--color-accent);}
+  .switch .dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;}
+  .switch.on .dot{left:19px;}
+  .divider{height:1px;background:var(--color-border);margin:16px 0;}
+  .icon-circle{
+    width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;font-size:24px;
+  }
+  .icon-circle.success{background:#ECFDF3;color:var(--color-success);}
+  .icon-circle.danger{background:var(--color-danger-subtle);color:var(--color-danger);}
+  .icon-circle.neutral{background:var(--color-surface-dim);color:var(--color-text-secondary);}
+  .icon-circle.accent{background:var(--color-accent-subtle);color:var(--color-accent);}
+
+  /* result screen */
+  .result-grid{display:flex;flex-direction:column;gap:24px;}
+  @media(min-width:640px){ .result-grid{flex-direction:row;align-items:flex-start;} .result-main{flex:1;} .result-qr{width:180px;flex-shrink:0;} }
+  .code-chip{
+    background:var(--color-code-bg);color:var(--color-code-text);border-radius:var(--radius-sm);
+    padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    font-size:18px;font-weight:600;
+  }
+  .code-chip button{
+    background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:6px;width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .meta-row{font-size:13px;color:var(--color-text-secondary);margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .qr-box{
+    background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);
+    aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+  }
+  .qr-placeholder{width:70%;height:70%;
+    background-image:
+      linear-gradient(90deg,#111 8px,transparent 8px),
+      linear-gradient(#111 8px,transparent 8px);
+    background-size:16px 16px; opacity:.85;
+  }
+
+  /* dashboard */
+  .dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .dash-title{font-size:20px;font-weight:700;}
+  .dash-actions{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-input{flex:1;min-width:160px;}
+  .link-card{
+    background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);
+    padding:14px 16px;margin-bottom:10px;
+  }
+  .link-card .row1{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+  .link-card .alias{font-family:"JetBrains Mono",monospace;font-weight:600;font-size:14px;}
+  .link-card .orig{font-size:13px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;}
+  .link-card .stats{font-size:12px;color:var(--color-text-disabled);margin-bottom:10px;}
+  .link-card .row-actions{display:flex;gap:6px;}
+  .icon-btn{
+    width:32px;height:32px;border-radius:8px;border:1px solid var(--color-border);background:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-secondary);font-size:14px;
+  }
+  .icon-btn.danger{color:var(--color-danger);}
+  table.dash-table{width:100%;border-collapse:collapse;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;}
+  table.dash-table th{text-align:left;font-size:12px;color:var(--color-text-secondary);padding:12px 14px;border-bottom:1px solid var(--color-border);background:#FAFAFA;}
+  table.dash-table td{padding:12px 14px;border-bottom:1px solid var(--color-border);font-size:14px;}
+  table.dash-table tr:last-child td{border-bottom:0;}
+  .dash-mobile{display:block;}
+  .dash-desktop{display:none;}
+  @media(min-width:1024px){ .dash-mobile{display:none;} .dash-desktop{display:block;} .page.dash-page{max-width:960px;margin:0 auto;} }
+  .empty-state{text-align:center;padding:48px 16px;}
+  .skeleton-row{height:64px;margin-bottom:10px;}
+
+  /* modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(17,17,19,.4);display:flex;align-items:center;justify-content:center;
+    padding:16px;z-index:100;
+  }
+  .modal{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:24px;max-width:360px;width:100%;}
+  .modal-actions{display:flex;gap:8px;margin-top:20px;}
+  .modal-actions .btn{flex:1;}
+
+  .footer-link{text-align:center;margin-top:24px;font-size:13px;color:var(--color-text-secondary);}
+  .footer-link a{color:var(--color-accent);text-decoration:none;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="lab-nav" id="screenNav"></div>
+<div class="lab-state-strip" id="stateStrip"></div>
+
+<!-- ============ ① 랜딩 + 생성 ============ -->
+<section class="screen" data-screen="landing">
+  <div class="page center-col">
+    <div class="logo">j1n<span>.</span>uk</div>
+
+    <div class="state-panel active" data-state="default">
+      <h1 class="h1">링크를 짧게</h1>
+      <p class="sub">긴 URL을 심플한 단축 링크와 QR코드로 만들어드려요</p>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label">원본 URL</label>
+          <input class="field" placeholder="https://example.com/very/long/link">
+        </div>
+        <details style="margin-bottom:16px;">
+          <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--color-text-secondary);">옵션 (만료일 · 비밀번호)</summary>
+          <div style="margin-top:14px;">
+            <div class="field-group">
+              <label class="field-label">만료일</label>
+              <select class="field">
+                <option>없음</option><option>1일</option><option>7일</option><option>30일</option><option>직접 설정</option>
+              </select>
+            </div>
+            <div class="toggle-row">
+              <span style="font-size:14px;">비밀번호 보호</span>
+              <div class="switch" onclick="this.classList.toggle('on')"><div class="dot"></div></div>
+            </div>
+          </div>
+        </details>
+        <button class="btn btn-primary btn-block">단축하기</button>
+      </div>
+      <div class="footer-link">관리자이신가요? <a href="#">로그인</a></div>
+    </div>
+
+    <div class="state-panel" data-state="loading">
+      <h1 class="h1">링크를 짧게</h1>
+      <p class="sub">긴 URL을 심플한 단축 링크와 QR코드로 만들어드려요</p>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label">원본 URL</label>
+          <input class="field" value="https://example.com/very/long/link" disabled style="color:var(--color-text-disabled)">
+        </div>
+        <button class="btn btn-primary btn-block" disabled><span class="spinner"></span>생성 중...</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="error-invalid">
+      <h1 class="h1">링크를 짧게</h1>
+      <p class="sub">긴 URL을 심플한 단축 링크와 QR코드로 만들어드려요</p>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label">원본 URL</label>
+          <input class="field err" value="example 아무거나">
+          <div class="helper err">올바른 URL 형식이 아니에요</div>
+        </div>
+        <button class="btn btn-primary btn-block">단축하기</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="error-server">
+      <h1 class="h1">링크를 짧게</h1>
+      <p class="sub">긴 URL을 심플한 단축 링크와 QR코드로 만들어드려요</p>
+      <div class="card">
+        <div class="banner banner-err">일시적인 오류가 발생했어요. 다시 시도해주세요</div>
+        <div class="field-group">
+          <label class="field-label">원본 URL</label>
+          <input class="field" value="https://example.com/very/long/link">
+        </div>
+        <button class="btn btn-primary btn-block">단축하기</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ② 생성 결과 ============ -->
+<section class="screen" data-screen="result">
+  <div class="page center-col">
+    <div class="logo">j1n<span>.</span>uk</div>
+
+    <div class="state-panel active" data-state="default">
+      <div class="icon-circle success">✓</div>
+      <h1 class="h1">생성 완료</h1>
+      <p class="sub">링크가 준비됐어요</p>
+      <div class="card">
+        <div class="result-grid">
+          <div class="result-main">
+            <div class="code-chip">
+              <span class="mono">j1n.uk/aB3xZ</span>
+              <button title="복사">⧉</button>
+            </div>
+            <div class="meta-row">
+              <span>원본: example.com/very/long/link/path…</span>
+            </div>
+            <div class="meta-row">
+              <span class="badge badge-active">활성</span>
+              <span class="badge badge-pw">비밀번호 보호</span>
+              <span>만료: 2026.09.05</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+              <button class="btn btn-primary">복사하기</button>
+              <button class="btn btn-secondary">QR 다운로드</button>
+            </div>
+          </div>
+          <div class="result-qr">
+            <div class="qr-box"><div class="qr-placeholder"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-link"><a href="#">새 링크 만들기</a></div>
+    </div>
+
+    <div class="state-panel" data-state="loading">
+      <div class="icon-circle neutral">…</div>
+      <h1 class="h1">생성 중</h1>
+      <p class="sub">잠시만 기다려주세요</p>
+      <div class="card">
+        <div class="result-grid">
+          <div class="result-main">
+            <div class="skeleton" style="height:52px;margin-bottom:12px;"></div>
+            <div class="skeleton" style="height:14px;width:70%;margin-bottom:8px;"></div>
+            <div class="skeleton" style="height:14px;width:40%;"></div>
+          </div>
+          <div class="result-qr">
+            <div class="skeleton" style="aspect-ratio:1/1;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="copied">
+      <div class="icon-circle success">✓</div>
+      <h1 class="h1">생성 완료</h1>
+      <p class="sub">링크가 준비됐어요</p>
+      <div class="card">
+        <div class="result-grid">
+          <div class="result-main">
+            <div class="code-chip">
+              <span class="mono">j1n.uk/aB3xZ</span>
+              <button title="복사됨" style="background:var(--color-success);">✓</button>
+            </div>
+            <div class="meta-row"><span style="color:var(--color-success);font-weight:600;">복사됨!</span></div>
+            <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+              <button class="btn btn-primary">복사하기</button>
+              <button class="btn btn-secondary">QR 다운로드</button>
+            </div>
+          </div>
+          <div class="result-qr"><div class="qr-box"><div class="qr-placeholder"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="error">
+      <div class="icon-circle danger">!</div>
+      <h1 class="h1">링크를 만들지 못했어요</h1>
+      <p class="sub">잠시 후 다시 시도해주세요</p>
+      <div class="card" style="text-align:center;">
+        <button class="btn btn-primary">다시 시도</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ③ 관리자 로그인 ============ -->
+<section class="screen" data-screen="login">
+  <div class="page narrow-col">
+    <div class="logo">j1n<span>.</span>uk</div>
+
+    <div class="state-panel active" data-state="default">
+      <h1 class="h1">관리자 로그인</h1>
+      <p class="sub">내 링크를 관리하려면 로그인하세요</p>
+      <div class="card">
+        <div class="field-group"><label class="field-label">이메일</label><input class="field" placeholder="you@example.com"></div>
+        <div class="field-group"><label class="field-label">비밀번호</label><input class="field" type="password" placeholder="••••••••"></div>
+        <button class="btn btn-primary btn-block">로그인</button>
+      </div>
+      <div class="footer-link"><a href="#">← 홈으로</a></div>
+    </div>
+
+    <div class="state-panel" data-state="loading">
+      <h1 class="h1">관리자 로그인</h1>
+      <p class="sub">내 링크를 관리하려면 로그인하세요</p>
+      <div class="card">
+        <div class="field-group"><label class="field-label">이메일</label><input class="field" value="you@example.com" disabled style="color:var(--color-text-disabled)"></div>
+        <div class="field-group"><label class="field-label">비밀번호</label><input class="field" type="password" value="1234" disabled style="color:var(--color-text-disabled)"></div>
+        <button class="btn btn-primary btn-block" disabled><span class="spinner"></span>로그인 중...</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="error">
+      <h1 class="h1">관리자 로그인</h1>
+      <p class="sub">내 링크를 관리하려면 로그인하세요</p>
+      <div class="card">
+        <div class="banner banner-err">이메일 또는 비밀번호가 올바르지 않아요</div>
+        <div class="field-group"><label class="field-label">이메일</label><input class="field err" value="you@example.com"></div>
+        <div class="field-group"><label class="field-label">비밀번호</label><input class="field err" type="password" value="wrongpass"></div>
+        <button class="btn btn-primary btn-block">로그인</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ④ 관리자 대시보드 ============ -->
+<section class="screen" data-screen="dashboard">
+  <div class="page dash-page">
+    <div class="dash-top">
+      <div class="dash-title">내 링크</div>
+      <button class="btn btn-ghost">로그아웃</button>
+    </div>
+
+    <div class="state-panel active" data-state="default">
+      <div class="dash-actions">
+        <button class="btn btn-primary">+ 새 링크 만들기</button>
+        <input class="field search-input" placeholder="별칭 또는 원본 URL 검색">
+      </div>
+
+      <div class="dash-mobile">
+        <div class="link-card">
+          <div class="row1"><span class="alias">/aB3xZ</span><span class="badge badge-active">활성</span></div>
+          <div class="orig">example.com/campaign/summer-sale/2026</div>
+          <div class="stats">클릭 128 · 생성 2026.07.20 · 만료 없음</div>
+          <div class="row-actions"><button class="icon-btn">📊</button><button class="icon-btn">✎</button><button class="icon-btn danger">🗑</button></div>
+        </div>
+        <div class="link-card">
+          <div class="row1"><span class="alias">/pricing</span><span class="badge badge-pw">비번보호</span></div>
+          <div class="orig">example.com/internal/pricing-sheet-2026</div>
+          <div class="stats">클릭 12 · 생성 2026.07.02 · 만료 2026.09.01</div>
+          <div class="row-actions"><button class="icon-btn">📊</button><button class="icon-btn">✎</button><button class="icon-btn danger">🗑</button></div>
+        </div>
+        <div class="link-card">
+          <div class="row1"><span class="alias">/old-doc</span><span class="badge badge-expired">만료됨</span></div>
+          <div class="orig">example.com/docs/legacy-onboarding</div>
+          <div class="stats">클릭 340 · 생성 2026.03.11 · 만료 2026.06.11</div>
+          <div class="row-actions"><button class="icon-btn">📊</button><button class="icon-btn">✎</button><button class="icon-btn danger">🗑</button></div>
+        </div>
+      </div>
+
+      <div class="dash-desktop">
+        <table class="dash-table">
+          <thead><tr><th>단축 URL</th><th>원본 URL</th><th>클릭수</th><th>생성일</th><th>만료일</th><th>상태</th><th>작업</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">j1n.uk/aB3xZ</td><td>example.com/campaign/summer-sale/2026</td><td>128</td><td>2026.07.20</td><td>없음</td><td><span class="badge badge-active">활성</span></td><td><button class="icon-btn">📊</button> <button class="icon-btn">✎</button> <button class="icon-btn danger">🗑</button></td></tr>
+            <tr><td class="mono">j1n.uk/pricing</td><td>example.com/internal/pricing-sheet-2026</td><td>12</td><td>2026.07.02</td><td>2026.09.01</td><td><span class="badge badge-pw">비번보호</span></td><td><button class="icon-btn">📊</button> <button class="icon-btn">✎</button> <button class="icon-btn danger">🗑</button></td></tr>
+            <tr><td class="mono">j1n.uk/old-doc</td><td>example.com/docs/legacy-onboarding</td><td>340</td><td>2026.03.11</td><td>2026.06.11</td><td><span class="badge badge-expired">만료됨</span></td><td><button class="icon-btn">📊</button> <button class="icon-btn">✎</button> <button class="icon-btn danger">🗑</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="empty">
+      <div class="dash-actions"><button class="btn btn-primary">+ 새 링크 만들기</button></div>
+      <div class="empty-state">
+        <div class="icon-circle neutral" style="font-size:28px;">🔗</div>
+        <p style="font-weight:600;margin:0 0 6px;">아직 만든 링크가 없어요</p>
+        <p class="sub" style="margin-bottom:20px;">첫 단축 링크를 만들어보세요</p>
+        <button class="btn btn-primary">첫 링크 만들기</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="loading">
+      <div class="dash-actions"><button class="btn btn-primary" disabled>+ 새 링크 만들기</button></div>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+
+    <div class="state-panel" data-state="error">
+      <div class="empty-state">
+        <div class="icon-circle danger" style="font-size:24px;">!</div>
+        <p style="font-weight:600;margin:0 0 16px;">목록을 불러오지 못했어요</p>
+        <button class="btn btn-primary">다시 시도</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="delete-confirm">
+      <div class="dash-actions"><button class="btn btn-primary">+ 새 링크 만들기</button></div>
+      <div class="link-card" style="opacity:.5;">
+        <div class="row1"><span class="alias">/aB3xZ</span><span class="badge badge-active">활성</span></div>
+        <div class="orig">example.com/campaign/summer-sale/2026</div>
+      </div>
+      <div class="modal-overlay">
+        <div class="modal">
+          <h2 style="font-size:18px;font-weight:700;margin:0 0 8px;">정말 삭제하시겠어요?</h2>
+          <p style="font-size:14px;color:var(--color-text-secondary);margin:0;">되돌릴 수 없어요. <span class="mono">j1n.uk/aB3xZ</span> 링크가 영구 삭제됩니다.</p>
+          <div class="modal-actions">
+            <button class="btn btn-secondary">취소</button>
+            <button class="btn btn-danger" style="border:1px solid var(--color-danger);">삭제</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ⑤ 비밀번호 보호 게이트 ============ -->
+<section class="screen" data-screen="gate">
+  <div class="page narrow-col">
+    <div class="logo">j1n<span>.</span>uk</div>
+
+    <div class="state-panel active" data-state="default">
+      <div class="icon-circle accent">🔒</div>
+      <h1 class="h1">비밀번호로 보호된 링크예요</h1>
+      <p class="sub"><span class="mono">j1n.uk/pricing</span></p>
+      <div class="card">
+        <div class="field-group"><label class="field-label">비밀번호</label><input class="field" type="password" placeholder="••••••••"></div>
+        <button class="btn btn-primary btn-block">이동하기</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="loading">
+      <div class="icon-circle accent">🔒</div>
+      <h1 class="h1">비밀번호로 보호된 링크예요</h1>
+      <p class="sub"><span class="mono">j1n.uk/pricing</span></p>
+      <div class="card">
+        <div class="field-group"><label class="field-label">비밀번호</label><input class="field" type="password" value="••••••••" disabled style="color:var(--color-text-disabled)"></div>
+        <button class="btn btn-primary btn-block" disabled><span class="spinner"></span>확인 중...</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="error">
+      <div class="icon-circle accent">🔒</div>
+      <h1 class="h1">비밀번호로 보호된 링크예요</h1>
+      <p class="sub"><span class="mono">j1n.uk/pricing</span></p>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label">비밀번호</label>
+          <input class="field err" type="password" value="wrongpass">
+          <div class="helper err">비밀번호가 올바르지 않아요</div>
+        </div>
+        <button class="btn btn-primary btn-block">이동하기</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ⑥ 만료 / 404 ============ -->
+<section class="screen" data-screen="expired">
+  <div class="page narrow-col">
+    <div class="logo">j1n<span>.</span>uk</div>
+
+    <div class="state-panel active" data-state="expired">
+      <div class="icon-circle neutral" style="font-size:24px;">⏱</div>
+      <h1 class="h1">이 링크는 만료되었어요</h1>
+      <p class="sub">만료일: 2026.06.11</p>
+      <div style="text-align:center;">
+        <button class="btn btn-primary">새 링크 만들기</button>
+      </div>
+    </div>
+
+    <div class="state-panel" data-state="notfound">
+      <div class="icon-circle neutral" style="font-size:24px;">?</div>
+      <h1 class="h1">링크를 찾을 수 없어요</h1>
+      <p class="sub">주소를 다시 확인해주세요</p>
+      <div style="text-align:center;">
+        <button class="btn btn-primary">홈으로 가기</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const screens = {
+    landing:  { label: '① 랜딩·생성', states: ['default','loading','error-invalid','error-server'] },
+    result:   { label: '② 생성 결과', states: ['default','loading','copied','error'] },
+    login:    { label: '③ 관리자 로그인', states: ['default','loading','error'] },
+    dashboard:{ label: '④ 대시보드', states: ['default','empty','loading','error','delete-confirm'] },
+    gate:     { label: '⑤ 비번 게이트', states: ['default','loading','error'] },
+    expired:  { label: '⑥ 만료·404', states: ['expired','notfound'] },
+  };
+  const stateLabels = {
+    'default':'기본','loading':'로딩','error':'에러','error-invalid':'에러(형식)','error-server':'에러(서버)',
+    'copied':'복사됨','empty':'빈 화면','delete-confirm':'삭제 확인','expired':'만료','notfound':'404'
+  };
+
+  const nav = document.getElementById('screenNav');
+  const strip = document.getElementById('stateStrip');
+
+  function renderStrip(screenKey){
+    strip.innerHTML = '<span class="tag">상태 미리보기 →</span>';
+    screens[screenKey].states.forEach((s,i)=>{
+      const b=document.createElement('button');
+      b.textContent = stateLabels[s]||s;
+      if(i===0) b.classList.add('active');
+      b.onclick=()=>showState(screenKey,s,b);
+      strip.appendChild(b);
+    });
+  }
+  function showScreen(key, navBtn){
+    Object.keys(screens).forEach(k=>{
+      document.querySelector('[data-screen="'+k+'"]').classList.toggle('active', k===key);
+    });
+    [...nav.children].forEach(c=>c.classList.remove('active'));
+    navBtn.classList.add('active');
+    renderStrip(key);
+  }
+  function showState(screenKey, stateKey, btn){
+    const panel = document.querySelector('[data-screen="'+screenKey+'"]');
+    panel.querySelectorAll('.state-panel').forEach(p=>{
+      p.classList.toggle('active', p.dataset.state===stateKey);
+    });
+    [...strip.children].forEach(c=>{ if(c.tagName==='BUTTON') c.classList.remove('active'); });
+    if(btn) btn.classList.add('active');
+  }
+
+  Object.entries(screens).forEach(([key,val],i)=>{
+    const b=document.createElement('button');
+    b.textContent=val.label;
+    if(i===0) b.classList.add('active');
+    b.onclick=()=>showScreen(key,b);
+    nav.appendChild(b);
+  });
+  renderStrip('landing');
+  showScreen('landing', nav.children[0]);
+</script>
+</body>
+</html>
