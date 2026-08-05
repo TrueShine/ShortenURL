@@ -11,6 +11,7 @@ export type LinkItem = {
   expires_at: string | null;
   password_hash: string | null;
   created_at: string;
+  created_by: string | null;
   clicks: { count: number }[] | null;
 };
 
