@@ -14,7 +14,7 @@ async function requireUser() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/_login");
   }
 
   return { supabase, user };
@@ -23,7 +23,7 @@ async function requireUser() {
 export async function signOut() {
   const { supabase } = await requireUser();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect("/_login");
 }
 
 export async function createLink(formData: FormData) {
@@ -35,12 +35,12 @@ export async function createLink(formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (!targetUrl) {
-    redirect(`/admin?error=${encodeURIComponent("유효한 URL(http/https)을 입력해주세요.")}`);
+    redirect(`/_admin?error=${encodeURIComponent("유효한 URL(http/https)을 입력해주세요.")}`);
   }
 
   if (!isValidCustomAlias(customAlias)) {
     redirect(
-      `/admin?error=${encodeURIComponent("alias는 영문/숫자/-/_ 조합 64자 이하여야 합니다.")}`
+      `/_admin?error=${encodeURIComponent("alias는 영문/숫자/-/_ 조합 64자 이하여야 합니다.")}`
     );
   }
 
@@ -55,11 +55,11 @@ export async function createLink(formData: FormData) {
   if (error) {
     const message =
       error.code === "23505" ? "이미 사용 중인 alias입니다." : error.message;
-    redirect(`/admin?error=${encodeURIComponent(message)}`);
+    redirect(`/_admin?error=${encodeURIComponent(message)}`);
   }
 
-  revalidatePath("/admin");
-  redirect(`/admin?created=${encodeURIComponent(customAlias)}`);
+  revalidatePath("/_admin");
+  redirect(`/_admin?created=${encodeURIComponent(customAlias)}`);
 }
 
 export async function updateLink(formData: FormData) {
@@ -72,7 +72,7 @@ export async function updateLink(formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (!targetUrl) {
-    redirect(`/admin?error=${encodeURIComponent("유효한 URL(http/https)을 입력해주세요.")}`);
+    redirect(`/_admin?error=${encodeURIComponent("유효한 URL(http/https)을 입력해주세요.")}`);
   }
 
   const update: {
@@ -93,11 +93,11 @@ export async function updateLink(formData: FormData) {
   const { error } = await supabase.from("links").update(update).eq("id", id);
 
   if (error) {
-    redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+    redirect(`/_admin?error=${encodeURIComponent(error.message)}`);
   }
 
-  revalidatePath("/admin");
-  redirect("/admin?updated=1");
+  revalidatePath("/_admin");
+  redirect("/_admin?updated=1");
 }
 
 export async function deleteLink(formData: FormData) {
@@ -106,5 +106,5 @@ export async function deleteLink(formData: FormData) {
 
   await supabase.from("links").delete().eq("id", id);
 
-  revalidatePath("/admin");
+  revalidatePath("/_admin");
 }

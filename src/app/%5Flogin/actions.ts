@@ -11,8 +11,8 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect("/login?error=1");
+    redirect("/_login?error=1");
   }
 
-  redirect("/admin");
+  redirect("/_admin");
 }
