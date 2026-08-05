@@ -1,22 +1,81 @@
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createProxyClient } from "@/lib/supabase/proxy";
 
 export const config = {
   matcher: [
-    "/((?!api|admin|login|logout|g|expired|favicon.ico|logo.png|robots.txt|sitemap.xml|_next).*)",
+    "/((?!_next|favicon.ico|logo.png|robots.txt|sitemap.xml).*)",
   ],
 };
 
-export async function proxy(request: NextRequest, event: NextFetchEvent) {
-  const segments = request.nextUrl.pathname.split("/").filter(Boolean);
+// Top-level path segments that are app routes, never short-link slugs.
+const RESERVED_TOP_LEVEL = new Set([
+  "api",
+  "admin",
+  "login",
+  "logout",
+  "g",
+  "expired",
+]);
 
-  // Only single-segment paths (e.g. /abc123) are candidate short-link slugs.
-  if (segments.length !== 1) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
 
-  const slug = segments[0];
+  const segments = pathname.split("/").filter(Boolean);
+  const first = segments[0];
+
+  if (first === "admin") {
+    return guardAdmin(request);
+  }
+
+  if (first === "login") {
+    return redirectIfAlreadyLoggedIn(request);
+  }
+
+  // Only single, non-reserved segments (e.g. /abc123) are candidate slugs.
+  if (segments.length !== 1 || RESERVED_TOP_LEVEL.has(first)) {
+    return NextResponse.next();
+  }
+
+  return resolveSlugRedirect(request, event, first);
+}
+
+async function guardAdmin(request: NextRequest) {
+  const { supabase, getResponse } = createProxyClient(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return getResponse();
+}
+
+async function redirectIfAlreadyLoggedIn(request: NextRequest) {
+  const { supabase, getResponse } = createProxyClient(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
+  return getResponse();
+}
+
+async function resolveSlugRedirect(
+  request: NextRequest,
+  event: NextFetchEvent,
+  slug: string
+) {
   const supabase = createAdminClient();
 
   const { data: link } = await supabase

@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { generateRandomSlug, isValidCustomAlias } from "@/lib/slug";
 import { hashPassword } from "@/lib/password";
+import { isValidTargetUrl } from "@/lib/url";
 
 const MAX_SLUG_ATTEMPTS = 5;
 
@@ -12,15 +13,6 @@ type CreateLinkBody = {
   expiresAt?: string;
   password?: string;
 };
-
-function isValidTargetUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(request: Request) {
   let body: CreateLinkBody;
