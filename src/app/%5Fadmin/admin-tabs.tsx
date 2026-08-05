@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CreateLinkPanel } from "./create-link-panel";
 import { LinksList, type LinkItem } from "./links-list";
 
-type Tab = "create" | "all";
+type Tab = "create" | "admin" | "other";
 
 export function AdminTabs({
   error,
@@ -15,7 +15,10 @@ export function AdminTabs({
   created?: string;
   links: LinkItem[];
 }) {
-  const [tab, setTab] = useState<Tab>(error || created ? "create" : "all");
+  const [tab, setTab] = useState<Tab>(error || created ? "create" : "admin");
+
+  const adminLinks = useMemo(() => links.filter((l) => l.created_by !== null), [links]);
+  const otherLinks = useMemo(() => links.filter((l) => l.created_by === null), [links]);
 
   return (
     <div>
@@ -23,16 +26,17 @@ export function AdminTabs({
         <TabButton active={tab === "create"} onClick={() => setTab("create")}>
           링크 생성
         </TabButton>
-        <TabButton active={tab === "all"} onClick={() => setTab("all")}>
-          전체 링크
+        <TabButton active={tab === "admin"} onClick={() => setTab("admin")}>
+          관리자 링크 ({adminLinks.length})
+        </TabButton>
+        <TabButton active={tab === "other"} onClick={() => setTab("other")}>
+          다른 링크 ({otherLinks.length})
         </TabButton>
       </div>
 
-      {tab === "create" ? (
-        <CreateLinkPanel error={error} created={created} />
-      ) : (
-        <LinksList links={links} />
-      )}
+      {tab === "create" && <CreateLinkPanel error={error} created={created} />}
+      {tab === "admin" && <LinksList links={adminLinks} />}
+      {tab === "other" && <LinksList links={otherLinks} />}
     </div>
   );
 }
@@ -52,7 +56,7 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`-mb-px border-b-2 px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+      className={`-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-[14px] font-semibold transition-colors ${
         active
           ? "border-accent text-accent"
           : "border-transparent text-text-secondary hover:text-text-primary"
