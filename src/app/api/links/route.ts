@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { generateRandomSlug, isValidCustomAlias } from "@/lib/slug";
 import { hashPassword } from "@/lib/password";
-import { isValidTargetUrl } from "@/lib/url";
+import { normalizeTargetUrl } from "@/lib/url";
 
 const MAX_SLUG_ATTEMPTS = 5;
 
@@ -22,9 +22,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "잘못된 요청 본문입니다." }, { status: 400 });
   }
 
-  const { targetUrl, customAlias, expiresAt, password } = body;
+  const { customAlias, expiresAt, password } = body;
 
-  if (!targetUrl || !isValidTargetUrl(targetUrl)) {
+  const targetUrl = body.targetUrl ? normalizeTargetUrl(body.targetUrl) : null;
+  if (!targetUrl) {
     return NextResponse.json(
       { error: "유효한 URL(http/https)을 입력해주세요." },
       { status: 400 }
@@ -108,6 +109,6 @@ export async function POST(request: Request) {
 }
 
 function toResponse(request: Request, slug: string) {
-  const origin = new URL(request.url).origin;
-  return { slug, shortUrl: `${origin}/${slug}` };
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+  return { slug, shortUrl: `${origin.replace(/\/$/, "")}/${slug}` };
 }
