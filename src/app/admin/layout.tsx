@@ -17,16 +17,26 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
-      <header className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
-        <span className="text-sm text-zinc-500">{user.email}</span>
-        <form action={signOut}>
-          <button type="submit" className="text-sm underline">
-            로그아웃
-          </button>
-        </form>
-      </header>
-      {children}
+    <div className="flex flex-1 flex-col bg-bg px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-[960px]">
+        <header className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-[15px] font-bold tracking-tight text-text-primary">
+              j1n<span className="text-accent">.</span>uk
+            </span>
+            <span className="text-xl font-bold text-text-primary">내 링크</span>
+          </div>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="text-[15px] font-semibold text-accent hover:underline"
+            >
+              로그아웃
+            </button>
+          </form>
+        </header>
+        {children}
+      </div>
     </div>
   );
 }
