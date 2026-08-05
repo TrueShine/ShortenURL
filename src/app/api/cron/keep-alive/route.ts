@@ -6,8 +6,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * Vercel Cron hits this daily with a real query to keep the project awake.
  */
 export async function GET(request: Request) {
+  // Fail closed when the secret is missing: comparing against
+  // `Bearer ${undefined}` would otherwise let anyone through by sending the
+  // literal header "Bearer undefined".
+  const secret = process.env.CRON_SECRET;
+  if (!secret) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${secret}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
