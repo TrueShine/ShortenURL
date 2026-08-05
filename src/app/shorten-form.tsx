@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import { normalizeTargetUrl } from "@/lib/url";
 
 type CreateLinkResult = {
   slug: string;
@@ -59,9 +60,8 @@ export function ShortenForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    try {
-      new URL(targetUrl);
-    } catch {
+    const normalizedTargetUrl = normalizeTargetUrl(targetUrl);
+    if (!normalizedTargetUrl) {
       setStatus("invalid");
       return;
     }
@@ -73,7 +73,7 @@ export function ShortenForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          targetUrl,
+          targetUrl: normalizedTargetUrl,
           expiresAt: presetToIsoDate(expiryPreset, customDate),
           password: passwordEnabled && password ? password : undefined,
         }),
@@ -89,7 +89,7 @@ export function ShortenForm() {
       setResult({
         slug: data.slug,
         shortUrl: data.shortUrl,
-        targetUrl,
+        targetUrl: normalizedTargetUrl,
         expiresAt: presetToIsoDate(expiryPreset, customDate) ?? null,
         hasPassword: passwordEnabled && Boolean(password),
       });

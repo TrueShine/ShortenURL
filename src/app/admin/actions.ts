@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { hashPassword } from "@/lib/password";
 import { isValidCustomAlias } from "@/lib/slug";
-import { isValidTargetUrl } from "@/lib/url";
+import { normalizeTargetUrl } from "@/lib/url";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -29,12 +29,12 @@ export async function signOut() {
 export async function createLink(formData: FormData) {
   const { supabase, user } = await requireUser();
 
-  const targetUrl = String(formData.get("targetUrl") ?? "");
+  const targetUrl = normalizeTargetUrl(String(formData.get("targetUrl") ?? ""));
   const customAlias = String(formData.get("customAlias") ?? "");
   const expiresAtRaw = String(formData.get("expiresAt") ?? "");
   const password = String(formData.get("password") ?? "");
 
-  if (!isValidTargetUrl(targetUrl)) {
+  if (!targetUrl) {
     redirect(`/admin?error=${encodeURIComponent("유효한 URL(http/https)을 입력해주세요.")}`);
   }
 
@@ -66,12 +66,12 @@ export async function updateLink(formData: FormData) {
   const { supabase } = await requireUser();
 
   const id = String(formData.get("id") ?? "");
-  const targetUrl = String(formData.get("targetUrl") ?? "");
+  const targetUrl = normalizeTargetUrl(String(formData.get("targetUrl") ?? ""));
   const expiresAtRaw = String(formData.get("expiresAt") ?? "");
   const clearPassword = formData.get("clearPassword") === "on";
   const password = String(formData.get("password") ?? "");
 
-  if (!isValidTargetUrl(targetUrl)) {
+  if (!targetUrl) {
     redirect(`/admin?error=${encodeURIComponent("유효한 URL(http/https)을 입력해주세요.")}`);
   }
 
