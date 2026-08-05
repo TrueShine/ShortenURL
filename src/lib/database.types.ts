@@ -29,6 +29,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       clicks: {
         Row: {
@@ -49,8 +50,20 @@ export type Database = {
           created_at?: string;
           referrer?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "clicks_link_id_fkey";
+            columns: ["link_id"];
+            referencedRelation: "links";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };
 
