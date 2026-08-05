@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
 import { normalizeTargetUrl } from "@/lib/url";
 
@@ -327,9 +328,9 @@ export function ShortenForm() {
 
       <div className="mt-6 text-center text-[13px] text-text-secondary">
         관리자이신가요?{" "}
-        <a href="/login" className="font-semibold text-accent hover:underline">
+        <Link href="/_login" className="font-semibold text-accent hover:underline">
           로그인
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -6,9 +6,8 @@ const generate = customAlphabet(alphabet, 7);
 
 export const RESERVED_SLUGS = new Set([
   "api",
-  "admin",
-  "login",
-  "logout",
+  "_admin",
+  "_login",
   "g",
   "expired",
   "favicon.ico",

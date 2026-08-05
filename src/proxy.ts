@@ -10,11 +10,12 @@ export const config = {
 };
 
 // Top-level path segments that are app routes, never short-link slugs.
+// _admin/_login are underscore-prefixed so they don't collide with the
+// custom-alias namespace admins can pick from (see lib/slug.ts).
 const RESERVED_TOP_LEVEL = new Set([
   "api",
-  "admin",
-  "login",
-  "logout",
+  "_admin",
+  "_login",
   "g",
   "expired",
 ]);
@@ -29,11 +30,11 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const segments = pathname.split("/").filter(Boolean);
   const first = segments[0];
 
-  if (first === "admin") {
+  if (first === "_admin") {
     return guardAdmin(request);
   }
 
-  if (first === "login") {
+  if (first === "_login") {
     return redirectIfAlreadyLoggedIn(request);
   }
 
@@ -52,7 +53,7 @@ async function guardAdmin(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/_login", request.url));
   }
 
   return getResponse();
@@ -65,7 +66,7 @@ async function redirectIfAlreadyLoggedIn(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+    return NextResponse.redirect(new URL("/_admin", request.url));
   }
 
   return getResponse();
