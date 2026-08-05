@@ -109,6 +109,12 @@ export async function POST(request: Request) {
 }
 
 function toResponse(request: Request, slug: string) {
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  const origin = configured
+    ? /^https?:\/\//i.test(configured)
+      ? configured
+      : `https://${configured}`
+    : new URL(request.url).origin;
+
   return { slug, shortUrl: `${origin.replace(/\/$/, "")}/${slug}` };
 }
