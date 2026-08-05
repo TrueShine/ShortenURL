@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { CreateLinkPanel } from "./create-link-panel";
-import { LinksList } from "./links-list";
+import { AdminTabs } from "./admin-tabs";
 
 export default async function AdminPage({
   searchParams,
@@ -15,10 +14,5 @@ export default async function AdminPage({
     .select("id, slug, target_url, expires_at, password_hash, created_at, clicks(count)")
     .order("created_at", { ascending: false });
 
-  return (
-    <div>
-      <CreateLinkPanel error={error} created={created} />
-      <LinksList links={links ?? []} />
-    </div>
-  );
+  return <AdminTabs error={error} created={created} links={links ?? []} />;
 }

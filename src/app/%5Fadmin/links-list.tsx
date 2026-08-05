@@ -4,7 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
 import { deleteLink, updateLink } from "./actions";
 
-type LinkItem = {
+export type LinkItem = {
   id: string;
   slug: string;
   target_url: string;
