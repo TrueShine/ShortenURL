@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   if (customAlias) {
     if (!isValidCustomAlias(customAlias)) {
       return NextResponse.json(
-        { error: "alias는 영문/숫자/-/_ 조합 64자 이하여야 합니다." },
+        { error: "alias는 영문/숫자/한글/-/_ 조합 64자 이하여야 합니다." },
         { status: 400 }
       );
     }
