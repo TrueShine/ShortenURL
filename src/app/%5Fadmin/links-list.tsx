@@ -92,9 +92,14 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               </span>
               {statusBadge(link)}
             </div>
-            <div className="mb-2 truncate text-[13px] text-text-secondary">
+            <a
+              href={link.target_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-2 block truncate text-[13px] text-text-secondary underline-offset-2 hover:underline"
+            >
               {link.target_url}
-            </div>
+            </a>
             <div className="mb-2.5 text-xs text-text-disabled">
               클릭 {link.clicks?.[0]?.count ?? 0} · 생성 {formatDate(link.created_at)} · 만료{" "}
               {link.expires_at ? formatDate(link.expires_at) : "없음"}
@@ -151,7 +156,14 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                     /{link.slug}
                   </td>
                   <td className="max-w-[280px] truncate border-b border-border px-3.5 py-3 text-sm">
-                    {link.target_url}
+                    <a
+                      href={link.target_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline-offset-2 hover:underline"
+                    >
+                      {link.target_url}
+                    </a>
                   </td>
                   <td className="border-b border-border px-3.5 py-3 text-sm">
                     {link.clicks?.[0]?.count ?? 0}
@@ -233,7 +245,7 @@ function EditForm({ link }: { link: LinkItem }) {
       <input type="hidden" name="id" value={link.id} />
       <input
         name="targetUrl"
-        type="url"
+        type="text"
         required
         defaultValue={link.target_url}
         className={fieldClass}
