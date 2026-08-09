@@ -40,7 +40,7 @@ export async function createLink(formData: FormData) {
 
   if (!isValidCustomAlias(customAlias)) {
     redirect(
-      `/_admin?error=${encodeURIComponent("alias는 영문/숫자/-/_ 조합 64자 이하여야 합니다.")}`
+      `/_admin?error=${encodeURIComponent("alias는 영문/숫자/한글/-/_ 조합 64자 이하여야 합니다.")}`
     );
   }
 
