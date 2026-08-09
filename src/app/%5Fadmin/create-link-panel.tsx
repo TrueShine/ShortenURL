@@ -35,7 +35,7 @@ export function CreateLinkPanel({
           <label className={labelClass}>대상 URL</label>
           <input
             name="targetUrl"
-            type="url"
+            type="text"
             required
             placeholder="https://example.com"
             className={fieldClass}
