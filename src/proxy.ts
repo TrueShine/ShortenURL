@@ -77,12 +77,22 @@ async function resolveSlugRedirect(
   event: NextFetchEvent,
   slug: string
 ) {
+  // request.nextUrl.pathname is percent-encoded for non-ASCII segments
+  // (e.g. Korean aliases), but links.slug stores the raw decoded text —
+  // the same decoding Next.js applies automatically to /g/[slug] params.
+  let decodedSlug: string;
+  try {
+    decodedSlug = decodeURIComponent(slug);
+  } catch {
+    return NextResponse.next();
+  }
+
   const supabase = createAdminClient();
 
   const { data: link } = await supabase
     .from("links")
     .select("id, target_url, expires_at, password_hash")
-    .eq("slug", slug)
+    .eq("slug", decodedSlug)
     .maybeSingle();
 
   if (!link) {
@@ -94,7 +104,7 @@ async function resolveSlugRedirect(
   }
 
   if (link.password_hash) {
-    return NextResponse.redirect(new URL(`/g/${slug}`, request.url));
+    return NextResponse.redirect(new URL(`/g/${decodedSlug}`, request.url));
   }
 
   event.waitUntil(
