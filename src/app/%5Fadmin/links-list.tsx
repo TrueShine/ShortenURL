@@ -87,9 +87,14 @@ export function LinksList({ links }: { links: LinkItem[] }) {
         {filtered.map((link) => (
           <div key={link.id} className="rounded-md border border-border bg-surface p-4">
             <div className="mb-1.5 flex items-center justify-between gap-2">
-              <span className="font-mono text-sm font-semibold text-text-primary">
+              <a
+                href={`/${link.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-sm font-semibold text-text-primary underline-offset-2 hover:underline"
+              >
                 /{link.slug}
-              </span>
+              </a>
               {statusBadge(link)}
             </div>
             <a
@@ -153,7 +158,14 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               <Fragment key={link.id}>
                 <tr>
                   <td className="border-b border-border px-3.5 py-3 font-mono text-sm">
-                    /{link.slug}
+                    <a
+                      href={`/${link.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline-offset-2 hover:underline"
+                    >
+                      /{link.slug}
+                    </a>
                   </td>
                   <td className="max-w-[280px] truncate border-b border-border px-3.5 py-3 text-sm">
                     <a
