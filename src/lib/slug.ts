@@ -17,7 +17,10 @@ export const RESERVED_SLUGS = new Set([
   "_next",
 ]);
 
-const CUSTOM_ALIAS_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/;
+// Admin custom aliases additionally allow complete Hangul syllables
+// (U+AC00–U+D7A3); anonymous auto-generated slugs are unaffected since
+// they never go through this pattern (see generateRandomSlug above).
+const CUSTOM_ALIAS_PATTERN = /^[a-zA-Z0-9_가-힣-]{1,64}$/;
 
 export function generateRandomSlug() {
   return generate();
