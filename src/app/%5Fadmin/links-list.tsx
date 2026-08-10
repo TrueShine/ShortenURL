@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { deleteLink, updateLink } from "./actions";
 
@@ -52,6 +53,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
   const [query, setQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<LinkItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [qrTarget, setQrTarget] = useState<LinkItem | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -110,6 +112,9 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               {link.expires_at ? formatDate(link.expires_at) : "없음"}
             </div>
             <div className="flex gap-1.5">
+              <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
+                ▦
+              </IconButton>
               <IconButton
                 label="수정"
                 onClick={() => setEditingId(editingId === link.id ? null : link.id)}
@@ -191,6 +196,9 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                   </td>
                   <td className="border-b border-border px-3.5 py-3 text-sm">
                     <div className="flex gap-1.5">
+                      <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
+                        ▦
+                      </IconButton>
                       <IconButton
                         label="수정"
                         onClick={() => setEditingId(editingId === link.id ? null : link.id)}
@@ -219,6 +227,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
       {deleteTarget && (
         <DeleteConfirmModal link={deleteTarget} onClose={() => setDeleteTarget(null)} />
       )}
+      {qrTarget && <QrModal link={qrTarget} onClose={() => setQrTarget(null)} />}
     </div>
   );
 }
@@ -275,6 +284,51 @@ function EditForm({ link }: { link: LinkItem }) {
       </label>
       <SubmitButton pendingLabel="저장 중...">저장</SubmitButton>
     </form>
+  );
+}
+
+function QrModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
+  const qrRef = useRef<HTMLCanvasElement>(null);
+  const shortUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/${link.slug}` : "";
+
+  function handleDownloadQr() {
+    const canvas = qrRef.current;
+    if (!canvas) return;
+    const a = document.createElement("a");
+    a.download = `${link.slug}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
+      <div className="w-full max-w-[360px] rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-2 text-lg font-bold text-text-primary">QR 코드</h2>
+        <p className="mb-4 text-sm text-text-secondary">
+          <span className="font-mono">j1n.uk/{link.slug}</span>
+        </p>
+        <div className="flex items-center justify-center rounded-md border border-border bg-white p-4">
+          {shortUrl && <QRCodeCanvas ref={qrRef} value={shortUrl} size={180} />}
+        </div>
+        <div className="mt-5 flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-11 flex-1 rounded-sm border border-border-strong text-[15px] font-semibold text-text-primary hover:border-text-primary"
+          >
+            닫기
+          </button>
+          <button
+            type="button"
+            onClick={handleDownloadQr}
+            className="h-11 flex-1 rounded-sm bg-accent text-[15px] font-semibold text-white hover:bg-accent-hover"
+          >
+            QR 다운로드
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
