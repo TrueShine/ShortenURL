@@ -1,9 +1,19 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { createLink } from "./actions";
+
+function subscribeNoop() {
+  return () => {};
+}
+function getOriginSnapshot() {
+  return window.location.origin;
+}
+function getOriginServerSnapshot() {
+  return null;
+}
 
 const fieldClass =
   "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[15px] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
@@ -17,10 +27,13 @@ export function CreateLinkPanel({
   created?: string;
 }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
-  const shortUrl =
-    created && typeof window !== "undefined"
-      ? `${window.location.origin}/${created}`
-      : null;
+  const origin = useSyncExternalStore(
+    subscribeNoop,
+    getOriginSnapshot,
+    getOriginServerSnapshot
+  );
+
+  const shortUrl = created && origin ? `${origin}/${created}` : null;
 
   function handleDownloadQr() {
     const canvas = qrRef.current;
