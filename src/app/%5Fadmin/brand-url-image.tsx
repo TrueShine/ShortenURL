@@ -1,9 +1,14 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { Nanum_Pen_Script } from "next/font/google";
+import localFont from "next/font/local";
 
-const nanumPenScript = Nanum_Pen_Script({ subsets: ["latin"], weight: ["400"] });
+// Font: Nanum DungGeunInYeon (나눔손글씨 둥근인연), (c) 2019 NAVER Corporation,
+// licensed under SIL OFL 1.1 — see src/fonts/NanumDungGeunInYeon-LICENSE.txt.
+// This license applies only to the font file, not the rest of this repo (MIT).
+const nanumDungGeunInYeon = localFont({
+  src: "../../fonts/NanumDungGeunInYeon.ttf",
+});
 
 const COLOR_PROTOCOL = "#CCCCCC";
 const COLOR_HOST = "#595959";
@@ -23,8 +28,9 @@ function buildSegments(url: string): Segment[] {
   if (!match) return [{ text: url, color: COLOR_HOST, bold: false }];
 
   const [, protocol, host, path = ""] = match;
+  const displayHost = host.replace(/^www\./i, "");
   const segments: Segment[] = [{ text: protocol, color: COLOR_PROTOCOL, bold: false }];
-  for (const ch of host) {
+  for (const ch of displayHost) {
     segments.push({ text: ch, color: ch === "1" ? COLOR_HOST_ONE : COLOR_HOST, bold: false });
   }
   if (path) {
@@ -57,7 +63,7 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
       if (!ctx) return;
 
       const segments = buildSegments(url);
-      const fontFamily = nanumPenScript.style.fontFamily;
+      const fontFamily = nanumDungGeunInYeon.style.fontFamily;
       const fontFor = (seg: Segment) => `${seg.bold ? 700 : 400} ${FONT_SIZE}px ${fontFamily}`;
 
       function draw() {
