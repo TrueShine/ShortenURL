@@ -20,6 +20,7 @@ const PADDING_X = 20;
 const PADDING_Y = 16;
 const ASCENT = FONT_SIZE * 0.78;
 const DESCENT = FONT_SIZE * 0.36;
+const SCALE = 4;
 
 type Segment = { text: string; color: string; bold: boolean };
 
@@ -74,11 +75,15 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
         }
         const height = PADDING_Y * 2 + ASCENT + DESCENT;
 
-        canvas!.width = Math.ceil(width);
-        canvas!.height = Math.ceil(height);
+        canvas!.width = Math.ceil(width * SCALE);
+        canvas!.height = Math.ceil(height * SCALE);
+        canvas!.style.width = `${width}px`;
+        canvas!.style.height = `${height}px`;
+
+        ctx!.scale(SCALE, SCALE);
 
         ctx!.fillStyle = "#FFFFFF";
-        ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
+        ctx!.fillRect(0, 0, width, height);
         ctx!.textBaseline = "alphabetic";
 
         let x = PADDING_X;
