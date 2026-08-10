@@ -4,6 +4,7 @@ import { useRef, useSyncExternalStore } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { createLink } from "./actions";
+import { BrandUrlCanvas, type BrandUrlCanvasHandle } from "./brand-url-image";
 
 function subscribeNoop() {
   return () => {};
@@ -27,6 +28,7 @@ export function CreateLinkPanel({
   created?: string;
 }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
+  const brandRef = useRef<BrandUrlCanvasHandle>(null);
   const origin = useSyncExternalStore(
     subscribeNoop,
     getOriginSnapshot,
@@ -44,6 +46,15 @@ export function CreateLinkPanel({
     link.click();
   }
 
+  async function handleDownloadBrandImage() {
+    const dataUrl = await brandRef.current?.getDataURL();
+    if (!dataUrl) return;
+    const link = document.createElement("a");
+    link.download = `${created ?? "url"}-image.png`;
+    link.href = dataUrl;
+    link.click();
+  }
+
   return (
     <form
       action={createLink}
@@ -55,20 +66,34 @@ export function CreateLinkPanel({
         </div>
       )}
       {created && (
-        <div className="mb-4 flex flex-col gap-3 rounded-sm bg-success-subtle px-3.5 py-3 text-[13px] text-success sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 flex flex-col gap-3 rounded-sm bg-success-subtle px-3.5 py-3 text-[13px] text-success">
           <span>/{created} 생성됐어요</span>
           {shortUrl && (
-            <div className="flex items-center gap-3">
-              <div className="rounded-md border border-border bg-white p-2">
-                <QRCodeCanvas ref={qrRef} value={shortUrl} size={96} />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="rounded-md border border-border bg-white p-2">
+                  <QRCodeCanvas ref={qrRef} value={shortUrl} size={96} />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDownloadQr}
+                  className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[13px] font-semibold text-text-primary hover:border-text-primary"
+                >
+                  QR 다운로드
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleDownloadQr}
-                className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[13px] font-semibold text-text-primary hover:border-text-primary"
-              >
-                QR 다운로드
-              </button>
+              <div className="flex items-center gap-3">
+                <div className="overflow-hidden rounded-md border border-border bg-white p-2">
+                  <BrandUrlCanvas ref={brandRef} url={shortUrl} />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDownloadBrandImage}
+                  className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[13px] font-semibold text-text-primary hover:border-text-primary"
+                >
+                  URL 이미지 다운로드
+                </button>
+              </div>
             </div>
           )}
         </div>

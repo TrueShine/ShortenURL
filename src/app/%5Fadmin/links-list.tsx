@@ -4,6 +4,7 @@ import { Fragment, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { deleteLink, updateLink } from "./actions";
+import { BrandUrlCanvas, type BrandUrlCanvasHandle } from "./brand-url-image";
 
 export type LinkItem = {
   id: string;
@@ -54,6 +55,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
   const [deleteTarget, setDeleteTarget] = useState<LinkItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [qrTarget, setQrTarget] = useState<LinkItem | null>(null);
+  const [brandTarget, setBrandTarget] = useState<LinkItem | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -114,6 +116,9 @@ export function LinksList({ links }: { links: LinkItem[] }) {
             <div className="flex gap-1.5">
               <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                 ▦
+              </IconButton>
+              <IconButton label="URL 이미지 보기" onClick={() => setBrandTarget(link)}>
+                🖼
               </IconButton>
               <IconButton
                 label="수정"
@@ -199,6 +204,9 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                       <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                         ▦
                       </IconButton>
+                      <IconButton label="URL 이미지 보기" onClick={() => setBrandTarget(link)}>
+                        🖼
+                      </IconButton>
                       <IconButton
                         label="수정"
                         onClick={() => setEditingId(editingId === link.id ? null : link.id)}
@@ -228,6 +236,9 @@ export function LinksList({ links }: { links: LinkItem[] }) {
         <DeleteConfirmModal link={deleteTarget} onClose={() => setDeleteTarget(null)} />
       )}
       {qrTarget && <QrModal link={qrTarget} onClose={() => setQrTarget(null)} />}
+      {brandTarget && (
+        <BrandUrlModal link={brandTarget} onClose={() => setBrandTarget(null)} />
+      )}
     </div>
   );
 }
@@ -325,6 +336,51 @@ function QrModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
             className="h-11 flex-1 rounded-sm bg-accent text-[15px] font-semibold text-white hover:bg-accent-hover"
           >
             QR 다운로드
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
+  const brandRef = useRef<BrandUrlCanvasHandle>(null);
+  const shortUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/${link.slug}` : "";
+
+  async function handleDownload() {
+    const dataUrl = await brandRef.current?.getDataURL();
+    if (!dataUrl) return;
+    const a = document.createElement("a");
+    a.download = `${link.slug}-image.png`;
+    a.href = dataUrl;
+    a.click();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
+      <div className="w-full max-w-[420px] rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-2 text-lg font-bold text-text-primary">URL 이미지</h2>
+        <p className="mb-4 text-sm text-text-secondary">
+          <span className="font-mono">j1n.uk/{link.slug}</span>
+        </p>
+        <div className="flex items-center justify-center overflow-x-auto rounded-md border border-border bg-white p-4">
+          {shortUrl && <BrandUrlCanvas ref={brandRef} url={shortUrl} />}
+        </div>
+        <div className="mt-5 flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-11 flex-1 rounded-sm border border-border-strong text-[15px] font-semibold text-text-primary hover:border-text-primary"
+          >
+            닫기
+          </button>
+          <button
+            type="button"
+            onClick={handleDownload}
+            className="h-11 flex-1 rounded-sm bg-accent text-[15px] font-semibold text-white hover:bg-accent-hover"
+          >
+            이미지 다운로드
           </button>
         </div>
       </div>
