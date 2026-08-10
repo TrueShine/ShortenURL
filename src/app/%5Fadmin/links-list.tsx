@@ -204,6 +204,9 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                       <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                         ▦
                       </IconButton>
+                      <IconButton label="URL 이미지 보기" onClick={() => setBrandTarget(link)}>
+                        🖼
+                      </IconButton>
                       <IconButton
                         label="수정"
                         onClick={() => setEditingId(editingId === link.id ? null : link.id)}
@@ -345,8 +348,8 @@ function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void 
   const shortUrl =
     typeof window !== "undefined" ? `${window.location.origin}/${link.slug}` : "";
 
-  function handleDownload() {
-    const dataUrl = brandRef.current?.toDataURL();
+  async function handleDownload() {
+    const dataUrl = await brandRef.current?.getDataURL();
     if (!dataUrl) return;
     const a = document.createElement("a");
     a.download = `${link.slug}-image.png`;

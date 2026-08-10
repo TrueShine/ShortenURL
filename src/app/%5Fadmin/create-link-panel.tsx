@@ -46,8 +46,8 @@ export function CreateLinkPanel({
     link.click();
   }
 
-  function handleDownloadBrandImage() {
-    const dataUrl = brandRef.current?.toDataURL();
+  async function handleDownloadBrandImage() {
+    const dataUrl = await brandRef.current?.getDataURL();
     if (!dataUrl) return;
     const link = document.createElement("a");
     link.download = `${created ?? "url"}-image.png`;

@@ -34,15 +34,20 @@ function buildSegments(url: string): Segment[] {
 }
 
 export type BrandUrlCanvasHandle = {
-  toDataURL: () => string | null;
+  /** Resolves with the PNG data URL once the font has loaded and the canvas has been drawn. */
+  getDataURL: () => Promise<string | null>;
 };
 
 export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
   function BrandUrlCanvas({ url }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const readyRef = useRef<Promise<void>>(Promise.resolve());
 
     useImperativeHandle(ref, () => ({
-      toDataURL: () => canvasRef.current?.toDataURL("image/png") ?? null,
+      getDataURL: async () => {
+        await readyRef.current;
+        return canvasRef.current?.toDataURL("image/png") ?? null;
+      },
     }));
 
     useEffect(() => {
@@ -80,16 +85,18 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
         }
       }
 
-      if (typeof document !== "undefined" && document.fonts) {
-        Promise.all([
-          document.fonts.load(`400 ${FONT_SIZE}px ${fontFamily}`),
-          document.fonts.load(`700 ${FONT_SIZE}px ${fontFamily}`),
-        ])
-          .then(draw)
-          .catch(draw);
-      } else {
-        draw();
-      }
+      const fontsReady =
+        typeof document !== "undefined" && document.fonts
+          ? Promise.all([
+              document.fonts.load(`400 ${FONT_SIZE}px ${fontFamily}`),
+              document.fonts.load(`700 ${FONT_SIZE}px ${fontFamily}`),
+            ]).then(
+              () => undefined,
+              () => undefined
+            )
+          : Promise.resolve();
+
+      readyRef.current = fontsReady.then(draw);
     }, [url]);
 
     return <canvas ref={canvasRef} className="max-w-full" />;
