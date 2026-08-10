@@ -3,6 +3,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import localFont from "next/font/local";
 
+// Font: Nanum DungGeunInYeon (나눔손글씨 둥근인연), (c) 2019 NAVER Corporation,
+// licensed under SIL OFL 1.1 — see src/fonts/NanumDungGeunInYeon-LICENSE.txt.
+// This license applies only to the font file, not the rest of this repo (MIT).
 const nanumDungGeunInYeon = localFont({
   src: "../../fonts/NanumDungGeunInYeon.ttf",
 });
