@@ -1,16 +1,16 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { Gaegu } from "next/font/google";
+import { Nanum_Pen_Script } from "next/font/google";
 
-const gaegu = Gaegu({ subsets: ["latin"], weight: ["400", "700"] });
+const nanumPenScript = Nanum_Pen_Script({ subsets: ["latin"], weight: ["400"] });
 
 const COLOR_PROTOCOL = "#CCCCCC";
 const COLOR_HOST = "#595959";
 const COLOR_HOST_ONE = "#EA3323";
 const COLOR_PATH = "#595959";
 
-const FONT_SIZE = 36;
+const FONT_SIZE = 44;
 const PADDING_X = 20;
 const PADDING_Y = 16;
 const ASCENT = FONT_SIZE * 0.78;
@@ -52,7 +52,7 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
       if (!ctx) return;
 
       const segments = buildSegments(url);
-      const fontFamily = gaegu.style.fontFamily;
+      const fontFamily = nanumPenScript.style.fontFamily;
       const fontFor = (seg: Segment) => `${seg.bold ? 700 : 400} ${FONT_SIZE}px ${fontFamily}`;
 
       function draw() {
