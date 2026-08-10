@@ -1,35 +1,49 @@
+NOTICE (not part of the official NAVER license text below)
+=============================================================
+
 This license applies only to the font file in this directory
 (NanumDungGeunInYeon.ttf) and does not apply to the rest of this
 repository, which is licensed separately under the project's MIT
 LICENSE at the repository root.
 
-Font name: Nanum DungGeunInYeon (나눔손글씨 둥근인연)
-Copyright (c) 2019 NAVER Corporation. Font created by the NAVER
-Clova AI OCR team as part of the "클로바 나눔손글씨" (Clova Nanum
-Handwriting) public handwriting-font campaign.
+This specific font file's internal metadata (read via its `name` table)
+identifies it as:
+  Font name:  Nanum DungGeunInYeon (나눔손글씨 둥근인연)
+  Copyright:  Copyright © 2019 NAVER Corporation. All rights reserved.
+              Font created by CLOVA AI OCR Team.
 
-Source / distribution page: https://hangeul.naver.com/font
-Direct distribution API used to obtain this file (font_id 27):
-https://clova.ai/handwriting/list.html
-Third-party catalog entry confirming license terms: https://noonnu.cc/font_page/587
+It was obtained from NAVER's official Clova Nanum Handwriting
+("클로바 나눔손글씨") distribution API (font_id 27), listed at
+https://clova.ai/handwriting/list.html, and cataloged at
+https://noonnu.cc/font_page/587.
 
-Per NAVER's official Nanum font license notice (https://hangeul.naver.com/font,
-https://help.naver.com/support/contents/contents.help?serviceNo=1074&categoryNo=3497):
+Per NAVER's official Nanum font notice at https://hangeul.naver.com/font
+and https://help.naver.com/service/30016/contents/18088 (라이선스 1항):
 "네이버 마루 부리 글꼴과 클로바 나눔손글씨도 나눔 글꼴과 같은 오픈 라이선스
 글꼴로 동일한 저작권 규정을 적용받습니다." — i.e. NAVER Maru Buri and Clova
-Nanum Handwriting fonts (including this one) are subject to the same open
-license terms as the core Nanum font family below. Per NAVER's own notice,
-the Korean translation is provided for convenience only and the English
-text below is the legally binding version.
+Nanum Handwriting fonts (including this one) are subject to the same SIL
+Open Font License terms as the core Nanum font family, reproduced verbatim
+and unedited below exactly as published by NAVER. Per NAVER's own notice,
+the Korean translation of the license is provided for convenience only and
+the English text is the legally binding version.
 
------------------------------------------------------------------------
+=============================================================
+BEGIN VERBATIM OFFICIAL NAVER NANUM FONT LICENSE NOTICE
+Copied unmodified from:
+https://help.naver.com/service/30016/contents/18088?osType=PC&lang=ko
+=============================================================
 
-Copyright (c) 2019, NAVER Corporation (https://www.navercorp.com/) with
-Reserved Font Name Nanum DungGeunInYeon.
+Copyright (c) 2010, NAVER Corporation (https://www.navercorp.com/) with
+Reserved Font Name Nanum, Naver Nanum, NanumGothic, Naver NanumGothic,
+NanumMyeongjo, Naver NanumMyeongjo, NanumBrush, Naver NanumBrush, NanumPen,
+Naver NanumPen, Naver NanumGothicEco, NanumGothicEco, Naver NanumMyeongjoEco,
+NanumMyeongjoEco, Naver NanumGothicLight, NanumGothicLight, NanumBarunGothic,
+Naver NanumBarunGothic, NanumSquareRound, NanumBarunPen, MaruBuri,
+NanumSquareNeo
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
-https://scripts.sil.org/OFL
+http://scripts.sil.org/OFL
 
 
 -----------------------------------------------------------------------
@@ -118,3 +132,7 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+=============================================================
+END VERBATIM OFFICIAL NAVER NANUM FONT LICENSE NOTICE
+=============================================================
