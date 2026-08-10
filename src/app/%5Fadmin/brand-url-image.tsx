@@ -1,9 +1,11 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { Nanum_Pen_Script } from "next/font/google";
+import localFont from "next/font/local";
 
-const nanumPenScript = Nanum_Pen_Script({ subsets: ["latin"], weight: ["400"] });
+const nanumDungGeunInYeon = localFont({
+  src: "../../fonts/NanumDungGeunInYeon.ttf",
+});
 
 const COLOR_PROTOCOL = "#CCCCCC";
 const COLOR_HOST = "#595959";
@@ -23,8 +25,9 @@ function buildSegments(url: string): Segment[] {
   if (!match) return [{ text: url, color: COLOR_HOST, bold: false }];
 
   const [, protocol, host, path = ""] = match;
+  const displayHost = host.replace(/^www\./i, "");
   const segments: Segment[] = [{ text: protocol, color: COLOR_PROTOCOL, bold: false }];
-  for (const ch of host) {
+  for (const ch of displayHost) {
     segments.push({ text: ch, color: ch === "1" ? COLOR_HOST_ONE : COLOR_HOST, bold: false });
   }
   if (path) {
@@ -57,7 +60,7 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
       if (!ctx) return;
 
       const segments = buildSegments(url);
-      const fontFamily = nanumPenScript.style.fontFamily;
+      const fontFamily = nanumDungGeunInYeon.style.fontFamily;
       const fontFor = (seg: Segment) => `${seg.bold ? 700 : 400} ${FONT_SIZE}px ${fontFamily}`;
 
       function draw() {
