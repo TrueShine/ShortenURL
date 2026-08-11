@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { hashPassword } from "@/lib/password";
 import { isValidCustomAlias } from "@/lib/slug";
 import { normalizeTargetUrl } from "@/lib/url";
+import { presetToIsoDate, isExpiryPreset } from "@/lib/expiry";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -31,7 +32,8 @@ export async function createLink(formData: FormData) {
 
   const targetUrl = normalizeTargetUrl(String(formData.get("targetUrl") ?? ""));
   const customAlias = String(formData.get("customAlias") ?? "");
-  const expiresAtRaw = String(formData.get("expiresAt") ?? "");
+  const expiryPresetRaw = String(formData.get("expiryPreset") ?? "none");
+  const expiryCustomDate = String(formData.get("expiryCustomDate") ?? "");
   const password = String(formData.get("password") ?? "");
 
   if (!targetUrl) {
@@ -44,10 +46,28 @@ export async function createLink(formData: FormData) {
     );
   }
 
+  if (!isExpiryPreset(expiryPresetRaw)) {
+    redirect(`/_admin?error=${encodeURIComponent("유효하지 않은 만료일 옵션입니다.")}`);
+  }
+
+  // Computed here (server, at submission-processing time) rather than trusting
+  // a client-precomputed timestamp, so "1일/7일/30일" stay accurate even if the
+  // form was left open for a while before submitting.
+  let expiresAtIso: string | null = null;
+  if (expiryPresetRaw === "custom") {
+    const iso = presetToIsoDate(expiryPresetRaw, expiryCustomDate);
+    if (!iso) {
+      redirect(`/_admin?error=${encodeURIComponent("유효한 만료일을 입력해주세요.")}`);
+    }
+    expiresAtIso = iso;
+  } else {
+    expiresAtIso = presetToIsoDate(expiryPresetRaw, "") ?? null;
+  }
+
   const { error } = await supabase.from("links").insert({
     slug: customAlias,
     target_url: targetUrl,
-    expires_at: expiresAtRaw ? new Date(expiresAtRaw).toISOString() : null,
+    expires_at: expiresAtIso,
     password_hash: password ? hashPassword(password) : null,
     created_by: user.id,
   });
