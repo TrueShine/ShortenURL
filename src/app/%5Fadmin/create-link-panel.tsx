@@ -134,6 +134,7 @@ export function CreateLinkPanel({
             <input
               name="expiryCustomDate"
               type="date"
+              required
               value={customDate}
               onChange={(e) => setCustomDate(e.target.value)}
               className={`${fieldClass} mt-2`}
