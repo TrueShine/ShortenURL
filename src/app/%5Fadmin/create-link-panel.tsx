@@ -5,7 +5,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { createLink } from "./actions";
 import { BrandUrlCanvas, type BrandUrlCanvasHandle } from "./brand-url-image";
-import { presetToIsoDate, type ExpiryPreset } from "@/lib/expiry";
+import { type ExpiryPreset } from "@/lib/expiry";
 
 function subscribeNoop() {
   return () => {};
@@ -39,7 +39,6 @@ export function CreateLinkPanel({
   );
 
   const shortUrl = created && origin ? `${origin}/${created}` : null;
-  const expiresAtIso = presetToIsoDate(expiryPreset, customDate) ?? "";
 
   function handleDownloadQr() {
     const canvas = qrRef.current;
@@ -133,13 +132,14 @@ export function CreateLinkPanel({
           </select>
           {expiryPreset === "custom" && (
             <input
+              name="expiryCustomDate"
               type="date"
               value={customDate}
               onChange={(e) => setCustomDate(e.target.value)}
               className={`${fieldClass} mt-2`}
             />
           )}
-          <input type="hidden" name="expiresAt" value={expiresAtIso} />
+          <input type="hidden" name="expiryPreset" value={expiryPreset} />
         </div>
         <div>
           <label className={labelClass}>비밀번호(선택)</label>
