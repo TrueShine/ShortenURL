@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { createLink } from "./actions";
 import { BrandUrlCanvas, type BrandUrlCanvasHandle } from "./brand-url-image";
+import { presetToIsoDate, type ExpiryPreset } from "@/lib/expiry";
 
 function subscribeNoop() {
   return () => {};
@@ -29,6 +30,8 @@ export function CreateLinkPanel({
 }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
   const brandRef = useRef<BrandUrlCanvasHandle>(null);
+  const [expiryPreset, setExpiryPreset] = useState<ExpiryPreset>("none");
+  const [customDate, setCustomDate] = useState("");
   const origin = useSyncExternalStore(
     subscribeNoop,
     getOriginSnapshot,
@@ -36,6 +39,7 @@ export function CreateLinkPanel({
   );
 
   const shortUrl = created && origin ? `${origin}/${created}` : null;
+  const expiresAtIso = presetToIsoDate(expiryPreset, customDate) ?? "";
 
   function handleDownloadQr() {
     const canvas = qrRef.current;
@@ -115,8 +119,27 @@ export function CreateLinkPanel({
           <input name="customAlias" required placeholder="my-link" className={fieldClass} />
         </div>
         <div>
-          <label className={labelClass}>만료일(선택)</label>
-          <input name="expiresAt" type="date" className={fieldClass} />
+          <label className={labelClass}>만료일</label>
+          <select
+            value={expiryPreset}
+            onChange={(e) => setExpiryPreset(e.target.value as ExpiryPreset)}
+            className={fieldClass}
+          >
+            <option value="none">없음</option>
+            <option value="1d">1일</option>
+            <option value="7d">7일</option>
+            <option value="30d">30일</option>
+            <option value="custom">직접 설정</option>
+          </select>
+          {expiryPreset === "custom" && (
+            <input
+              type="date"
+              value={customDate}
+              onChange={(e) => setCustomDate(e.target.value)}
+              className={`${fieldClass} mt-2`}
+            />
+          )}
+          <input type="hidden" name="expiresAt" value={expiresAtIso} />
         </div>
         <div>
           <label className={labelClass}>비밀번호(선택)</label>
