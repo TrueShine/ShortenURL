@@ -119,6 +119,10 @@ export function CreateLinkPanel({
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <div>
+            <label className={labelClass}>비밀번호(선택)</label>
+            <input name="password" type="password" className={fieldClass} />
+          </div>
+          <div>
             <label className={labelClass}>만료일</label>
             <div className="flex items-center gap-2">
               <select
@@ -144,10 +148,6 @@ export function CreateLinkPanel({
               )}
             </div>
             <input type="hidden" name="expiryPreset" value={expiryPreset} />
-          </div>
-          <div>
-            <label className={labelClass}>비밀번호(선택)</label>
-            <input name="password" type="password" className={fieldClass} />
           </div>
         </div>
         <SubmitButton pendingLabel="생성 중...">생성</SubmitButton>
