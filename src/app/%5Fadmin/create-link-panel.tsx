@@ -117,34 +117,38 @@ export function CreateLinkPanel({
           <label className={labelClass}>alias</label>
           <input name="customAlias" required placeholder="my-link" className={fieldClass} />
         </div>
-        <div>
-          <label className={labelClass}>만료일</label>
-          <select
-            value={expiryPreset}
-            onChange={(e) => setExpiryPreset(e.target.value as ExpiryPreset)}
-            className={fieldClass}
-          >
-            <option value="none">없음</option>
-            <option value="1d">1일</option>
-            <option value="7d">7일</option>
-            <option value="30d">30일</option>
-            <option value="custom">직접 설정</option>
-          </select>
-          {expiryPreset === "custom" && (
-            <input
-              name="expiryCustomDate"
-              type="date"
-              required
-              value={customDate}
-              onChange={(e) => setCustomDate(e.target.value)}
-              className={`${fieldClass} mt-2`}
-            />
-          )}
-          <input type="hidden" name="expiryPreset" value={expiryPreset} />
-        </div>
-        <div>
-          <label className={labelClass}>비밀번호(선택)</label>
-          <input name="password" type="password" className={fieldClass} />
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <label className={labelClass}>만료일</label>
+            <div className="flex items-center gap-2">
+              <select
+                value={expiryPreset}
+                onChange={(e) => setExpiryPreset(e.target.value as ExpiryPreset)}
+                className={`${fieldClass} !w-auto min-w-[92px]`}
+              >
+                <option value="none">없음</option>
+                <option value="1d">1일</option>
+                <option value="7d">7일</option>
+                <option value="30d">30일</option>
+                <option value="custom">직접 설정</option>
+              </select>
+              {expiryPreset === "custom" && (
+                <input
+                  name="expiryCustomDate"
+                  type="date"
+                  required
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  className={`${fieldClass} !w-auto`}
+                />
+              )}
+            </div>
+            <input type="hidden" name="expiryPreset" value={expiryPreset} />
+          </div>
+          <div>
+            <label className={labelClass}>비밀번호(선택)</label>
+            <input name="password" type="password" className={fieldClass} />
+          </div>
         </div>
         <SubmitButton pendingLabel="생성 중...">생성</SubmitButton>
       </div>
