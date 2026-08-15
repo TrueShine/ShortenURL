@@ -8,14 +8,12 @@ type Tab = "create" | "admin" | "other";
 
 export function AdminTabs({
   error,
-  created,
   links,
 }: {
   error?: string;
-  created?: string;
   links: LinkItem[];
 }) {
-  const [tab, setTab] = useState<Tab>(error || created ? "create" : "admin");
+  const [tab, setTab] = useState<Tab>(error ? "create" : "admin");
 
   const adminLinks = useMemo(() => links.filter((l) => l.created_by !== null), [links]);
   const otherLinks = useMemo(() => links.filter((l) => l.created_by === null), [links]);
@@ -34,7 +32,7 @@ export function AdminTabs({
         </TabButton>
       </div>
 
-      {tab === "create" && <CreateLinkPanel error={error} created={created} />}
+      {tab === "create" && <CreateLinkPanel error={error} />}
       {tab === "admin" && <LinksList links={adminLinks} />}
       {tab === "other" && <LinksList links={otherLinks} />}
     </div>
