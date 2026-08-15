@@ -27,7 +27,12 @@ export async function signOut() {
   redirect("/_login");
 }
 
-export async function createLink(formData: FormData) {
+export type CreateLinkState = { createdSlug?: string } | null;
+
+export async function createLink(
+  _prevState: CreateLinkState,
+  formData: FormData
+): Promise<CreateLinkState> {
   const { supabase, user } = await requireUser();
 
   const targetUrl = normalizeTargetUrl(String(formData.get("targetUrl") ?? ""));
@@ -79,7 +84,7 @@ export async function createLink(formData: FormData) {
   }
 
   revalidatePath("/_admin");
-  redirect(`/_admin?created=${encodeURIComponent(customAlias)}`);
+  return { createdSlug: customAlias };
 }
 
 export async function updateLink(formData: FormData) {
