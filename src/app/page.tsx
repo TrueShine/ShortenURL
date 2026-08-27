@@ -1,3 +1,4 @@
+import Script from "next/script";
 import { Logo } from "@/components/logo";
 import { ShortenForm } from "./shorten-form";
 
@@ -8,6 +9,12 @@ export default function Home() {
         <Logo />
       </div>
       <ShortenForm />
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5996415121817335"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
     </div>
   );
 }
