@@ -95,58 +95,76 @@ export function LinksList({
 
       {/* mobile cards */}
       <div className="flex flex-col gap-2.5 lg:hidden">
-        {filtered.map((link) => (
-          <div key={link.id} className="rounded-md border border-border bg-surface p-4">
-            <div className="mb-1.5 flex items-center justify-between gap-2">
-              <a
-                href={`/${link.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-sm font-semibold text-text-primary underline-offset-2 hover:underline"
-              >
-                /{link.slug}
-              </a>
-              {statusBadge(link)}
-            </div>
-            <a
-              href={link.target_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mb-2 block truncate text-[0.8125rem] text-text-secondary underline-offset-2 hover:underline"
+        {filtered.map((link, idx) => {
+          const shortUrl =
+            typeof window !== "undefined" ? `${window.location.origin}/${link.slug}` : "";
+          return (
+            <div
+              key={link.id}
+              className={`rounded-md border border-border p-4 ${
+                idx % 2 === 1 ? "bg-bg" : "bg-surface"
+              }`}
             >
-              {link.target_url}
-            </a>
-            <div className="mb-2.5 text-xs text-text-disabled">
-              클릭 {link.clicks?.[0]?.count ?? 0} · 생성 {formatDate(link.created_at)} · 만료{" "}
-              {link.expires_at ? formatDate(link.expires_at) : "없음"}
-              {creatorEmailById && (
-                <>
-                  {" "}
-                  · 생성자 {link.created_by ? creatorEmailById[link.created_by] ?? "—" : "—"}
-                </>
-              )}
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <a
+                    href={`/${link.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate font-mono text-sm font-semibold text-text-primary underline-offset-2 hover:underline"
+                  >
+                    /{link.slug}
+                  </a>
+                  <CopyTextButton text={shortUrl} label="단축 URL 복사" />
+                </div>
+                {statusBadge(link)}
+              </div>
+              <div className="mb-2 flex items-center gap-1.5">
+                <a
+                  href={link.target_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-w-0 truncate text-[0.8125rem] text-text-secondary underline-offset-2 hover:underline"
+                >
+                  {link.target_url}
+                </a>
+                <CopyTextButton text={link.target_url} label="원본 URL 복사" />
+              </div>
+              <div className="mb-2.5 flex flex-col gap-0.5 text-xs text-text-disabled">
+                <span>
+                  클릭 {link.clicks?.[0]?.count ?? 0}
+                  {creatorEmailById && (
+                    <> · 생성자 {link.created_by ? creatorEmailById[link.created_by] ?? "—" : "—"}</>
+                  )}
+                </span>
+                <span>생성 {formatDate(link.created_at)}</span>
+                <span>만료 {link.expires_at ? formatDate(link.expires_at) : "없음"}</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex flex-wrap gap-1.5">
+                  <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
+                    ▦
+                  </IconButton>
+                  <IconButton label="URL 이미지 보기" onClick={() => setBrandTarget(link)}>
+                    🖼
+                  </IconButton>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <IconButton
+                    label="수정"
+                    onClick={() => setEditingId(editingId === link.id ? null : link.id)}
+                  >
+                    ✎
+                  </IconButton>
+                  <IconButton label="삭제" danger onClick={() => setDeleteTarget(link)}>
+                    🗑
+                  </IconButton>
+                </div>
+              </div>
+              {editingId === link.id && <EditForm link={link} />}
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              <CopyIconButton slug={link.slug} />
-              <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
-                ▦
-              </IconButton>
-              <IconButton label="URL 이미지 보기" onClick={() => setBrandTarget(link)}>
-                🖼
-              </IconButton>
-              <IconButton
-                label="수정"
-                onClick={() => setEditingId(editingId === link.id ? null : link.id)}
-              >
-                ✎
-              </IconButton>
-              <IconButton label="삭제" danger onClick={() => setDeleteTarget(link)}>
-                🗑
-              </IconButton>
-            </div>
-            {editingId === link.id && <EditForm link={link} />}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* desktop table */}
@@ -277,26 +295,6 @@ export function LinksList({
         <BrandUrlModal link={brandTarget} onClose={() => setBrandTarget(null)} />
       )}
     </div>
-  );
-}
-
-function CopyIconButton({ slug }: { slug: string }) {
-  const { copied, copy } = useCopyFeedback();
-  const shortUrl =
-    typeof window !== "undefined" ? `${window.location.origin}/${slug}` : "";
-
-  return (
-    <button
-      type="button"
-      title="복사"
-      onClick={() => copy(shortUrl)}
-      className={`inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium ${
-        copied ? "text-success" : "text-text-secondary"
-      }`}
-    >
-      <span aria-hidden="true">{copied ? "✓" : "⧉"}</span>
-      <span>{copied ? "복사됨" : "복사"}</span>
-    </button>
   );
 }
 
