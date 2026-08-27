@@ -179,7 +179,7 @@ export function ShortenForm() {
             </div>
 
             <div className="flex w-full items-center justify-center rounded-md border border-border bg-white p-4 sm:w-[11.25rem] sm:shrink-0">
-              <QRCodeCanvas ref={qrRef} value={result.shortUrl} size={148} />
+              <QRCodeCanvas ref={qrRef} value={result.shortUrl} size={222} />
             </div>
           </div>
         </div>

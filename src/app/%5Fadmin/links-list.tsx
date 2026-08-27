@@ -320,7 +320,7 @@ function QrModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
           <span className="font-mono">j1n.uk/{link.slug}</span>
         </p>
         <div className="flex items-center justify-center rounded-md border border-border bg-white p-4">
-          {shortUrl && <QRCodeCanvas ref={qrRef} value={shortUrl} size={180} />}
+          {shortUrl && <QRCodeCanvas ref={qrRef} value={shortUrl} size={270} />}
         </div>
         <div className="mt-5 flex gap-2">
           <button

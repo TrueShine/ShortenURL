@@ -66,7 +66,7 @@ export function CreateLinkPanel({ error }: { error?: string }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
               <div className="flex items-center gap-3">
                 <div className="rounded-md border border-border bg-white p-2">
-                  <QRCodeCanvas ref={qrRef} value={shortUrl} size={96} />
+                  <QRCodeCanvas ref={qrRef} value={shortUrl} size={144} />
                 </div>
                 <button
                   type="button"
