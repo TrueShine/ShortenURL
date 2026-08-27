@@ -1,32 +1,11 @@
 import { requireSuperAdmin } from "../actions";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, listAllUserEmails } from "@/lib/supabase/admin";
 import { CreateAccountForm } from "./create-account-form";
 
 const ROLE_LABEL: Record<string, string> = {
   super_admin: "슈퍼관리자",
   admin: "관리자",
 };
-
-// auth.admin.listUsers() only returns one page (50 users by default) —
-// walk every page so accounts past the first page don't show up as
-// "(알 수 없음)" once there are more than a handful of admins.
-async function listAllUserEmails(admin: ReturnType<typeof createAdminClient>) {
-  const perPage = 200;
-  const emailById = new Map<string, string | undefined>();
-
-  for (let page = 1; ; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
-    if (error || !data) break;
-
-    for (const user of data.users) {
-      emailById.set(user.id, user.email);
-    }
-
-    if (data.users.length < perPage) break;
-  }
-
-  return emailById;
-}
 
 export default async function AccountsPage() {
   await requireSuperAdmin();

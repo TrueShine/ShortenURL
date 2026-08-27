@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, listAllUserEmails } from "@/lib/supabase/admin";
 import { AdminTabs } from "./admin-tabs";
 
 export default async function AdminPage({
@@ -30,20 +30,12 @@ export default async function AdminPage({
   // scoped to their own links by RLS, making "created by" redundant.
   let creatorEmailById: Record<string, string> | undefined;
   if (isSuperAdmin && links) {
-    const creatorIds = Array.from(
-      new Set(links.map((l) => l.created_by).filter((id): id is string => id !== null))
+    const emailById = await listAllUserEmails(createAdminClient());
+    creatorEmailById = Object.fromEntries(
+      Array.from(emailById.entries()).filter(
+        (entry): entry is [string, string] => Boolean(entry[1])
+      )
     );
-    if (creatorIds.length > 0) {
-      const admin = createAdminClient();
-      const results = await Promise.all(
-        creatorIds.map((id) => admin.auth.admin.getUserById(id))
-      );
-      creatorEmailById = Object.fromEntries(
-        results
-          .map((r, i) => [creatorIds[i], r.data.user?.email] as const)
-          .filter((entry): entry is [string, string] => Boolean(entry[1]))
-      );
-    }
   }
 
   return <AdminTabs error={error} links={links ?? []} creatorEmailById={creatorEmailById} />;

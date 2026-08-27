@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"buzz reactions add --channel c5ce53f2-f026-4647-b070-1617d1756acb --event 422cf23b52705776403b69be18a567bc45ccc0d0e96fc8ce374ff2f05d7ca8b2 --emoji \\\"✅\\\" 2>&1\\nbuzz reactions add --channel ...",
+  "error": "Exit code 1\n{\"error\":\"user_error\",\"message\":\"error: unexpected argument '--channel' found\\n\\nUsage: buzz reactions add [OPTIONS] --event <EVENT> --emoji <EMOJI>\\n\\nFor more information, try '--help'.\\n\",\"retryable\":false}\n{\"error\":\"user_error\",\"message\":\"error: unexpected argument '--channel' found\\n\\nUsage: buzz reactions add [OPTIONS] --event <EVENT> --emoji <EMOJI>\\n\\nFor more information, try '--help'.\\n\",\"retryable\":false}",
+  "timestamp": "2026-08-27T05:23:58.497Z",
+  "retry_count": 1
+}
