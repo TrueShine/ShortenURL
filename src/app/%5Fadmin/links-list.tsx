@@ -362,7 +362,7 @@ function QrModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#111113]/40 px-4 pb-4 pt-[10vh]">
       <div className="w-full max-w-[22.5rem] rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-2 text-lg font-bold text-text-primary">QR 코드</h2>
         <p className="mb-4 text-sm text-text-secondary">
@@ -407,7 +407,7 @@ function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#111113]/40 px-4 pb-4 pt-[10vh]">
       <div className="w-full max-w-[26.25rem] rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-2 text-lg font-bold text-text-primary">URL 이미지</h2>
         <p className="mb-4 text-sm text-text-secondary">
