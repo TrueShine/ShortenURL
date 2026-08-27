@@ -59,6 +59,27 @@ export type Database = {
           },
         ];
       };
+      profiles: {
+        Row: {
+          id: string;
+          role: "super_admin" | "admin";
+          must_change_password: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          role?: "super_admin" | "admin";
+          must_change_password?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          role?: "super_admin" | "admin";
+          must_change_password?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -69,3 +90,4 @@ export type Database = {
 
 export type LinkRow = Database["public"]["Tables"]["links"]["Row"];
 export type ClickRow = Database["public"]["Tables"]["clicks"]["Row"];
+export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
