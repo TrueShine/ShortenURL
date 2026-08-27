@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { customAlphabet } from "nanoid";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "../actions";
@@ -75,4 +77,78 @@ export async function createAdminAccount(
   }
 
   return { created: { email, password: tempPassword } };
+}
+
+export type ResetPasswordState = {
+  error?: string;
+  created?: { password: string };
+};
+
+export async function resetAdminPassword(
+  _prevState: ResetPasswordState,
+  formData: FormData
+): Promise<ResetPasswordState> {
+  // Re-verified here regardless of which UI path submitted the form — see
+  // the comment on createAdminAccount above.
+  await requireSuperAdmin();
+
+  const accountId = String(formData.get("accountId") ?? "");
+  if (!accountId) {
+    return { error: "잘못된 요청입니다." };
+  }
+
+  const tempPassword = generateTempPassword();
+  const admin = createAdminClient();
+
+  const { error: authError } = await admin.auth.admin.updateUserById(accountId, {
+    password: tempPassword,
+  });
+
+  if (authError) {
+    return { error: authError.message };
+  }
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({ must_change_password: true })
+    .eq("id", accountId);
+
+  if (profileError) {
+    return { error: profileError.message };
+  }
+
+  revalidatePath("/_admin/accounts");
+  return { created: { password: tempPassword } };
+}
+
+export async function deleteAdminAccount(formData: FormData) {
+  // The actual authorization + self-delete gate — disabling the delete
+  // button for your own row in the UI is just UX, not security, since this
+  // Server Action can still be POSTed to directly.
+  const { user } = await requireSuperAdmin();
+
+  const accountId = String(formData.get("accountId") ?? "");
+  if (!accountId) {
+    redirect(`/_admin/accounts?error=${encodeURIComponent("잘못된 요청입니다.")}`);
+  }
+
+  if (accountId === user.id) {
+    redirect(
+      `/_admin/accounts?error=${encodeURIComponent("본인(슈퍼관리자) 계정은 삭제할 수 없습니다.")}`
+    );
+  }
+
+  const admin = createAdminClient();
+
+  // profiles row cascades away via its FK to auth.users (see
+  // 0003_role_based_access.sql), and links.created_by is set to null via its
+  // own FK (see 0001_init.sql) — existing links made by this account stay,
+  // just without an owner, exactly like pre-existing anonymous links.
+  const { error } = await admin.auth.admin.deleteUser(accountId);
+
+  if (error) {
+    redirect(`/_admin/accounts?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/_admin/accounts");
 }

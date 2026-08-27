@@ -1,6 +1,7 @@
 import { requireSuperAdmin } from "../actions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateAccountForm } from "./create-account-form";
+import { AccountActions } from "./account-actions";
 
 const ROLE_LABEL: Record<string, string> = {
   super_admin: "슈퍼관리자",
@@ -28,8 +29,13 @@ async function listAllUserEmails(admin: ReturnType<typeof createAdminClient>) {
   return emailById;
 }
 
-export default async function AccountsPage() {
-  await requireSuperAdmin();
+export default async function AccountsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const { user } = await requireSuperAdmin();
 
   const admin = createAdminClient();
 
@@ -48,6 +54,12 @@ export default async function AccountsPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {error && (
+        <div className="rounded-sm bg-danger-subtle px-3.5 py-3 text-[0.8125rem] text-danger">
+          {error}
+        </div>
+      )}
+
       <CreateAccountForm />
 
       <div className="overflow-hidden rounded-md border border-border bg-surface">
@@ -58,6 +70,7 @@ export default async function AccountsPage() {
               <th className="px-4 py-3 font-semibold">역할</th>
               <th className="px-4 py-3 font-semibold">비밀번호 변경</th>
               <th className="px-4 py-3 font-semibold">생성일</th>
+              <th className="px-4 py-3 font-semibold">작업</th>
             </tr>
           </thead>
           <tbody>
@@ -73,12 +86,19 @@ export default async function AccountsPage() {
                 <td className="px-4 py-3 text-text-secondary">
                   {new Date(account.created_at).toLocaleDateString("ko-KR")}
                 </td>
+                <td className="px-4 py-3">
+                  <AccountActions
+                    accountId={account.id}
+                    email={account.email}
+                    isSelf={account.id === user.id}
+                  />
+                </td>
               </tr>
             ))}
             {accounts.length === 0 && (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-4 py-6 text-center text-text-disabled"
                 >
                   계정이 없어요.
