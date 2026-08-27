@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useActionState, useRef, useState, useSyncExternalStore } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
 import { createLink } from "./actions";
@@ -21,23 +21,17 @@ const fieldClass =
   "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[15px] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
 const labelClass = "mb-1.5 block text-[13px] font-semibold text-text-primary";
 
-export function CreateLinkPanel({
-  error,
-  created,
-}: {
-  error?: string;
-  created?: string;
-}) {
+export function CreateLinkPanel({ error }: { error?: string }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
   const brandRef = useRef<BrandUrlCanvasHandle>(null);
-  const [expiryPreset, setExpiryPreset] = useState<ExpiryPreset>("none");
-  const [customDate, setCustomDate] = useState("");
+  const [state, formAction] = useActionState(createLink, null);
   const origin = useSyncExternalStore(
     subscribeNoop,
     getOriginSnapshot,
     getOriginServerSnapshot
   );
 
+  const created = state?.createdSlug;
   const shortUrl = created && origin ? `${origin}/${created}` : null;
 
   function handleDownloadQr() {
@@ -59,10 +53,7 @@ export function CreateLinkPanel({
   }
 
   return (
-    <form
-      action={createLink}
-      className="rounded-md border border-border bg-surface p-6 shadow-sm"
-    >
+    <div className="rounded-md border border-border bg-surface p-6 shadow-sm">
       {error && (
         <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[13px] text-danger">
           {error}
@@ -102,56 +93,71 @@ export function CreateLinkPanel({
         </div>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-        <div className="min-w-[220px] flex-1">
-          <label className={labelClass}>대상 URL</label>
-          <input
-            name="targetUrl"
-            type="text"
-            required
-            placeholder="https://example.com"
-            className={fieldClass}
-          />
+      {/* Remounted on each successful create so the (uncontrolled) fields and
+          expiry-preset state reset without imperative form.reset() calls. */}
+      <CreateLinkFields key={created ?? "form"} formAction={formAction} />
+    </div>
+  );
+}
+
+function CreateLinkFields({
+  formAction,
+}: {
+  formAction: (formData: FormData) => void;
+}) {
+  const [expiryPreset, setExpiryPreset] = useState<ExpiryPreset>("none");
+  const [customDate, setCustomDate] = useState("");
+
+  return (
+    <form action={formAction} className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+      <div className="min-w-[220px] flex-1">
+        <label className={labelClass}>대상 URL</label>
+        <input
+          name="targetUrl"
+          type="text"
+          required
+          placeholder="https://example.com"
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className={labelClass}>alias</label>
+        <input name="customAlias" required placeholder="my-link" className={fieldClass} />
+      </div>
+      <div className="flex flex-wrap items-end gap-4">
+        <div>
+          <label className={labelClass}>비밀번호(선택)</label>
+          <input name="password" type="password" className={fieldClass} />
         </div>
         <div>
-          <label className={labelClass}>alias</label>
-          <input name="customAlias" required placeholder="my-link" className={fieldClass} />
-        </div>
-        <div className="flex flex-wrap items-end gap-4">
-          <div>
-            <label className={labelClass}>비밀번호(선택)</label>
-            <input name="password" type="password" className={fieldClass} />
+          <label className={labelClass}>만료일</label>
+          <div className="flex items-center gap-2">
+            <select
+              value={expiryPreset}
+              onChange={(e) => setExpiryPreset(e.target.value as ExpiryPreset)}
+              className={`${fieldClass} !w-auto min-w-[92px]`}
+            >
+              <option value="none">없음</option>
+              <option value="1d">1일</option>
+              <option value="7d">7일</option>
+              <option value="30d">30일</option>
+              <option value="custom">직접 설정</option>
+            </select>
+            {expiryPreset === "custom" && (
+              <input
+                name="expiryCustomDate"
+                type="date"
+                required
+                value={customDate}
+                onChange={(e) => setCustomDate(e.target.value)}
+                className={`${fieldClass} !w-auto`}
+              />
+            )}
           </div>
-          <div>
-            <label className={labelClass}>만료일</label>
-            <div className="flex items-center gap-2">
-              <select
-                value={expiryPreset}
-                onChange={(e) => setExpiryPreset(e.target.value as ExpiryPreset)}
-                className={`${fieldClass} !w-auto min-w-[92px]`}
-              >
-                <option value="none">없음</option>
-                <option value="1d">1일</option>
-                <option value="7d">7일</option>
-                <option value="30d">30일</option>
-                <option value="custom">직접 설정</option>
-              </select>
-              {expiryPreset === "custom" && (
-                <input
-                  name="expiryCustomDate"
-                  type="date"
-                  required
-                  value={customDate}
-                  onChange={(e) => setCustomDate(e.target.value)}
-                  className={`${fieldClass} !w-auto`}
-                />
-              )}
-            </div>
-            <input type="hidden" name="expiryPreset" value={expiryPreset} />
-          </div>
+          <input type="hidden" name="expiryPreset" value={expiryPreset} />
         </div>
-        <SubmitButton pendingLabel="생성 중...">생성</SubmitButton>
       </div>
+      <SubmitButton pendingLabel="생성 중...">생성</SubmitButton>
     </form>
   );
 }
