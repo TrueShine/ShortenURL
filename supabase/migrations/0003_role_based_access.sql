@@ -2,6 +2,12 @@
 -- (own links only, no account management). Single-admin era ends here —
 -- see 0002_admin_full_visibility.sql for the "any authenticated user is
 -- the admin" policies this migration replaces.
+--
+-- Wrapped in an explicit transaction so this is atomic regardless of how
+-- the SQL client executes multi-statement scripts (e.g. per-statement
+-- autocommit) — if the operator seed below can't be applied unambiguously,
+-- everything in this file rolls back rather than partially applying.
+begin;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
@@ -29,29 +35,31 @@ revoke all on function public.current_user_role() from public;
 grant execute on function public.current_user_role() to authenticated;
 
 -- Seed exactly the current operator account as super_admin — NOT every row
--- in auth.users. Replace v_operator_email below with the real login email
--- (check the Supabase dashboard) before running this migration. The DO
--- block hard-fails if it matches nobody, so a stale placeholder can't
--- silently leave zero super_admins or, worse, silently promote the wrong
--- account.
+-- in auth.users. This app has been documented as single-admin since
+-- 0002 (see its header comment), so instead of hardcoding a specific
+-- email/UUID (a PII value that would otherwise sit in git history for no
+-- real benefit), this asserts that premise still holds: exactly one
+-- auth.users row exists, and that row is the one seeded. If it doesn't
+-- hold (zero, or more than one), the whole migration rolls back with an
+-- explicit error rather than guessing which account is the operator.
 do $$
 declare
-  v_operator_email text := 'REPLACE_WITH_OPERATOR_EMAIL';
-  v_seeded integer;
+  v_user_count integer;
+  v_operator_id uuid;
 begin
-  insert into public.profiles (id, role, must_change_password)
-  select id, 'super_admin', false
-  from auth.users
-  where email = v_operator_email
-  on conflict (id) do nothing;
+  select count(*) into v_user_count from auth.users;
 
-  get diagnostics v_seeded = row_count;
-
-  if v_seeded = 0 then
+  if v_user_count <> 1 then
     raise exception
-      'super_admin seed matched 0 rows for email %. Edit v_operator_email in this migration to the real operator email (see Supabase dashboard > Authentication > Users) before running.',
-      v_operator_email;
+      'Expected exactly 1 existing auth.users row to seed as super_admin (single-admin app), found %. Seed the operator account explicitly (edit this block to filter by the real id/email) instead of running it unmodified against a multi-account project.',
+      v_user_count;
   end if;
+
+  select id into v_operator_id from auth.users limit 1;
+
+  insert into public.profiles (id, role, must_change_password)
+  values (v_operator_id, 'super_admin', false)
+  on conflict (id) do nothing;
 end $$;
 
 -- Profiles are only ever written via the service-role client (account
@@ -105,3 +113,5 @@ create policy "admin selects clicks"
       and links.created_by = auth.uid()
     )
   );
+
+commit;
