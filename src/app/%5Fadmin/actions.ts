@@ -21,13 +21,37 @@ async function requireUser() {
   return { supabase, user };
 }
 
+// Gate for account-management screens/actions. This is the actual
+// authorization check — hiding the "계정 관리" nav link for admins is just
+// UX, not security, since a Server Action can still be POSTed to directly.
+export async function requireSuperAdmin() {
+  const { supabase, user } = await requireUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role !== "super_admin") {
+    redirect("/_admin");
+  }
+
+  return { supabase, user };
+}
+
 export async function signOut() {
   const { supabase } = await requireUser();
   await supabase.auth.signOut();
   redirect("/_login");
 }
 
-export async function createLink(formData: FormData) {
+export type CreateLinkState = { createdSlug?: string } | null;
+
+export async function createLink(
+  _prevState: CreateLinkState,
+  formData: FormData
+): Promise<CreateLinkState> {
   const { supabase, user } = await requireUser();
 
   const targetUrl = normalizeTargetUrl(String(formData.get("targetUrl") ?? ""));
@@ -79,7 +103,7 @@ export async function createLink(formData: FormData) {
   }
 
   revalidatePath("/_admin");
-  redirect(`/_admin?created=${encodeURIComponent(customAlias)}`);
+  return { createdSlug: customAlias };
 }
 
 export async function updateLink(formData: FormData) {

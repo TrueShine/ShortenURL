@@ -46,6 +46,25 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   return resolveSlugRedirect(request, event, first);
 }
 
+const ADMIN_ROLES = new Set(["super_admin", "admin"]);
+const CHANGE_PASSWORD_PATH = "/_admin/change-password";
+
+// auth.getUser() above may have rotated the session's refresh token, which
+// createProxyClient only persists onto the response it returns via
+// getResponse() — a redirect built from a fresh NextResponse.redirect()
+// wouldn't carry that, so any redirect out of guardAdmin needs the current
+// getResponse() cookies copied onto it or the rotation is silently dropped.
+function redirectWithRefreshedCookies(
+  destination: URL,
+  getResponse: () => NextResponse
+) {
+  const redirectResponse = NextResponse.redirect(destination);
+  getResponse()
+    .cookies.getAll()
+    .forEach((cookie) => redirectResponse.cookies.set(cookie));
+  return redirectResponse;
+}
+
 async function guardAdmin(request: NextRequest) {
   const { supabase, getResponse } = createProxyClient(request);
   const {
@@ -54,6 +73,33 @@ async function guardAdmin(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(new URL("/_login", request.url));
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role, must_change_password")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  // Fail closed: a query error, a missing profile row (e.g. an auth user
+  // left behind by a partially-failed account-creation rollback, see
+  // _admin/accounts/actions.ts), or a role outside the known set must never
+  // fall through to "allowed" — only an explicit, recognized role does.
+  if (profileError || !profile || !ADMIN_ROLES.has(profile.role)) {
+    await supabase.auth.signOut();
+    return redirectWithRefreshedCookies(new URL("/_login", request.url), getResponse);
+  }
+
+  // Force accounts issued by a super_admin (must_change_password=true, see
+  // _admin/accounts) through the change-password screen before anything
+  // else in /_admin — checked here rather than in the shared layout because
+  // the layout re-renders around change-password's own page too, which
+  // would loop; middleware can see the pathname and exempt it.
+  if (profile.must_change_password && request.nextUrl.pathname !== CHANGE_PASSWORD_PATH) {
+    return redirectWithRefreshedCookies(
+      new URL(CHANGE_PASSWORD_PATH, request.url),
+      getResponse
+    );
   }
 
   return getResponse();

@@ -15,9 +15,9 @@ const COLOR_HOST = "#595959";
 const COLOR_HOST_ONE = "#EA3323";
 const COLOR_PATH = "#595959";
 
-const FONT_SIZE = 44;
-const PADDING_X = 20;
-const PADDING_Y = 16;
+const FONT_SIZE = 66;
+const PADDING_X = 30;
+const PADDING_Y = 24;
 const ASCENT = FONT_SIZE * 0.78;
 const DESCENT = FONT_SIZE * 0.36;
 const SCALE = 4;

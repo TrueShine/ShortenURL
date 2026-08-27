@@ -58,6 +58,36 @@ export async function POST(request: Request) {
       );
     }
 
+    // Being logged in isn't enough — an authenticated Supabase user with no
+    // (or an unrecognized) profiles.role must not be able to create links
+    // just by calling this API directly with a valid session. Checked here
+    // explicitly in addition to the RLS policy on links.insert, since this
+    // route otherwise only relied on "logged in" the way the RLS policy
+    // used to.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, must_change_password")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "관리자 계정만 커스텀 alias를 사용할 수 있습니다." },
+        { status: 403 }
+      );
+    }
+
+    // An account issued with a temporary password (see _admin/accounts)
+    // shouldn't be able to do anything admin-shaped — including via this
+    // API — until it's changed. Mirrors the RLS check in 0005; kept here
+    // too so the failure is a clear 403 instead of a generic insert error.
+    if (profile.must_change_password) {
+      return NextResponse.json(
+        { error: "비밀번호를 먼저 변경해주세요." },
+        { status: 403 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("links")
       .insert({

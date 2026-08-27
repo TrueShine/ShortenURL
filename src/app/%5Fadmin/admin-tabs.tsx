@@ -8,14 +8,12 @@ type Tab = "create" | "admin" | "other";
 
 export function AdminTabs({
   error,
-  created,
   links,
 }: {
   error?: string;
-  created?: string;
   links: LinkItem[];
 }) {
-  const [tab, setTab] = useState<Tab>(error || created ? "create" : "admin");
+  const [tab, setTab] = useState<Tab>(error ? "create" : "admin");
 
   const adminLinks = useMemo(() => links.filter((l) => l.created_by !== null), [links]);
   const otherLinks = useMemo(() => links.filter((l) => l.created_by === null), [links]);
@@ -34,7 +32,7 @@ export function AdminTabs({
         </TabButton>
       </div>
 
-      {tab === "create" && <CreateLinkPanel error={error} created={created} />}
+      {tab === "create" && <CreateLinkPanel error={error} />}
       {tab === "admin" && <LinksList links={adminLinks} />}
       {tab === "other" && <LinksList links={otherLinks} />}
     </div>
@@ -56,7 +54,7 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+      className={`-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-[0.875rem] font-semibold transition-colors ${
         active
           ? "border-accent text-accent"
           : "border-transparent text-text-secondary hover:text-text-primary"

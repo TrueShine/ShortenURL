@@ -4,9 +4,9 @@ import { AdminTabs } from "./admin-tabs";
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string; updated?: string }>;
+  searchParams: Promise<{ error?: string; updated?: string }>;
 }) {
-  const { error, created } = await searchParams;
+  const { error } = await searchParams;
   const supabase = await createClient();
 
   const { data: links } = await supabase
@@ -16,5 +16,5 @@ export default async function AdminPage({
     )
     .order("created_at", { ascending: false });
 
-  return <AdminTabs error={error} created={created} links={links ?? []} />;
+  return <AdminTabs error={error} links={links ?? []} />;
 }

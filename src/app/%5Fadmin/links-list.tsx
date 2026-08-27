@@ -18,7 +18,7 @@ export type LinkItem = {
 };
 
 const fieldClass =
-  "h-10 w-full rounded-sm border border-border bg-white px-3 text-[14px] text-text-primary focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
+  "h-10 w-full rounded-sm border border-border bg-white px-3 text-[0.875rem] text-text-primary focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -72,7 +72,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
           🔗
         </div>
         <p className="mb-1.5 font-semibold text-text-primary">아직 만든 링크가 없어요</p>
-        <p className="text-[15px] text-text-secondary">첫 단축 링크를 만들어보세요</p>
+        <p className="text-[0.9375rem] text-text-secondary">첫 단축 링크를 만들어보세요</p>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               href={link.target_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-2 block truncate text-[13px] text-text-secondary underline-offset-2 hover:underline"
+              className="mb-2 block truncate text-[0.8125rem] text-text-secondary underline-offset-2 hover:underline"
             >
               {link.target_url}
             </a>
@@ -113,7 +113,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               클릭 {link.clicks?.[0]?.count ?? 0} · 생성 {formatDate(link.created_at)} · 만료{" "}
               {link.expires_at ? formatDate(link.expires_at) : "없음"}
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                 ▦
               </IconButton>
@@ -177,7 +177,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                       /{link.slug}
                     </a>
                   </td>
-                  <td className="max-w-[280px] truncate border-b border-border px-3.5 py-3 text-sm">
+                  <td className="max-w-[17.5rem] truncate border-b border-border px-3.5 py-3 text-sm">
                     <a
                       href={link.target_url}
                       target="_blank"
@@ -200,7 +200,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                     {statusBadge(link)}
                   </td>
                   <td className="border-b border-border px-3.5 py-3 text-sm">
-                    <div className="flex gap-1.5">
+                    <div className="flex flex-wrap gap-1.5">
                       <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                         ▦
                       </IconButton>
@@ -259,11 +259,12 @@ function IconButton({
       type="button"
       title={label}
       onClick={onClick}
-      className={`flex h-8 w-8 items-center justify-center rounded-md border border-border bg-white text-sm ${
+      className={`inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium ${
         danger ? "text-danger" : "text-text-secondary"
       }`}
     >
-      {children}
+      <span aria-hidden="true">{children}</span>
+      <span>{label}</span>
     </button>
   );
 }
@@ -314,26 +315,26 @@ function QrModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
-      <div className="w-full max-w-[360px] rounded-lg bg-white p-6 shadow-md">
+      <div className="w-full max-w-[22.5rem] rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-2 text-lg font-bold text-text-primary">QR 코드</h2>
         <p className="mb-4 text-sm text-text-secondary">
           <span className="font-mono">j1n.uk/{link.slug}</span>
         </p>
         <div className="flex items-center justify-center rounded-md border border-border bg-white p-4">
-          {shortUrl && <QRCodeCanvas ref={qrRef} value={shortUrl} size={180} />}
+          {shortUrl && <QRCodeCanvas ref={qrRef} value={shortUrl} size={270} />}
         </div>
         <div className="mt-5 flex gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="h-11 flex-1 rounded-sm border border-border-strong text-[15px] font-semibold text-text-primary hover:border-text-primary"
+            className="h-11 flex-1 rounded-sm border border-border-strong text-[0.9375rem] font-semibold text-text-primary hover:border-text-primary"
           >
             닫기
           </button>
           <button
             type="button"
             onClick={handleDownloadQr}
-            className="h-11 flex-1 rounded-sm bg-accent text-[15px] font-semibold text-white hover:bg-accent-hover"
+            className="h-11 flex-1 rounded-sm bg-accent text-[0.9375rem] font-semibold text-white hover:bg-accent-hover"
           >
             QR 다운로드
           </button>
@@ -359,7 +360,7 @@ function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
-      <div className="w-full max-w-[420px] rounded-lg bg-white p-6 shadow-md">
+      <div className="w-full max-w-[26.25rem] rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-2 text-lg font-bold text-text-primary">URL 이미지</h2>
         <p className="mb-4 text-sm text-text-secondary">
           <span className="font-mono">j1n.uk/{link.slug}</span>
@@ -371,14 +372,14 @@ function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void 
           <button
             type="button"
             onClick={onClose}
-            className="h-11 flex-1 rounded-sm border border-border-strong text-[15px] font-semibold text-text-primary hover:border-text-primary"
+            className="h-11 flex-1 rounded-sm border border-border-strong text-[0.9375rem] font-semibold text-text-primary hover:border-text-primary"
           >
             닫기
           </button>
           <button
             type="button"
             onClick={handleDownload}
-            className="h-11 flex-1 rounded-sm bg-accent text-[15px] font-semibold text-white hover:bg-accent-hover"
+            className="h-11 flex-1 rounded-sm bg-accent text-[0.9375rem] font-semibold text-white hover:bg-accent-hover"
           >
             이미지 다운로드
           </button>
@@ -391,7 +392,7 @@ function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void 
 function DeleteConfirmModal({ link, onClose }: { link: LinkItem; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
-      <div className="w-full max-w-[360px] rounded-lg bg-white p-6 shadow-md">
+      <div className="w-full max-w-[22.5rem] rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-2 text-lg font-bold text-text-primary">
           정말 삭제하시겠어요?
         </h2>
@@ -403,7 +404,7 @@ function DeleteConfirmModal({ link, onClose }: { link: LinkItem; onClose: () => 
           <button
             type="button"
             onClick={onClose}
-            className="h-11 flex-1 rounded-sm border border-border-strong text-[15px] font-semibold text-text-primary hover:border-text-primary"
+            className="h-11 flex-1 rounded-sm border border-border-strong text-[0.9375rem] font-semibold text-text-primary hover:border-text-primary"
           >
             취소
           </button>
@@ -417,7 +418,7 @@ function DeleteConfirmModal({ link, onClose }: { link: LinkItem; onClose: () => 
             <input type="hidden" name="id" value={link.id} />
             <button
               type="submit"
-              className="h-11 w-full rounded-sm border border-danger text-[15px] font-semibold text-danger hover:bg-danger-subtle"
+              className="h-11 w-full rounded-sm border border-danger text-[0.9375rem] font-semibold text-danger hover:bg-danger-subtle"
             >
               삭제
             </button>
