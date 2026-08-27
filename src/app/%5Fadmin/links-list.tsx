@@ -3,6 +3,7 @@
 import { Fragment, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { SubmitButton } from "@/components/submit-button";
+import { useCopyFeedback } from "@/lib/use-copy-feedback";
 import { deleteLink, updateLink } from "./actions";
 import { BrandUrlCanvas, type BrandUrlCanvasHandle } from "./brand-url-image";
 
@@ -50,7 +51,13 @@ function statusBadge(link: LinkItem) {
   );
 }
 
-export function LinksList({ links }: { links: LinkItem[] }) {
+export function LinksList({
+  links,
+  creatorEmailById,
+}: {
+  links: LinkItem[];
+  creatorEmailById?: Record<string, string>;
+}) {
   const [query, setQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<LinkItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -112,8 +119,15 @@ export function LinksList({ links }: { links: LinkItem[] }) {
             <div className="mb-2.5 text-xs text-text-disabled">
               클릭 {link.clicks?.[0]?.count ?? 0} · 생성 {formatDate(link.created_at)} · 만료{" "}
               {link.expires_at ? formatDate(link.expires_at) : "없음"}
+              {creatorEmailById && (
+                <>
+                  {" "}
+                  · 생성자 {link.created_by ? creatorEmailById[link.created_by] ?? "—" : "—"}
+                </>
+              )}
             </div>
             <div className="flex flex-wrap gap-1.5">
+              <CopyIconButton slug={link.slug} />
               <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                 ▦
               </IconButton>
@@ -158,6 +172,11 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               <th className="border-b border-border px-3.5 py-3 text-left text-xs text-text-secondary">
                 상태
               </th>
+              {creatorEmailById && (
+                <th className="border-b border-border px-3.5 py-3 text-left text-xs text-text-secondary">
+                  생성자
+                </th>
+              )}
               <th className="border-b border-border px-3.5 py-3 text-left text-xs text-text-secondary">
                 작업
               </th>
@@ -199,8 +218,14 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                   <td className="border-b border-border px-3.5 py-3 text-sm">
                     {statusBadge(link)}
                   </td>
+                  {creatorEmailById && (
+                    <td className="border-b border-border px-3.5 py-3 text-sm text-text-secondary">
+                      {link.created_by ? creatorEmailById[link.created_by] ?? "—" : "—"}
+                    </td>
+                  )}
                   <td className="border-b border-border px-3.5 py-3 text-sm">
                     <div className="flex flex-wrap gap-1.5">
+                      <CopyIconButton slug={link.slug} />
                       <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                         ▦
                       </IconButton>
@@ -221,7 +246,10 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                 </tr>
                 {editingId === link.id && (
                   <tr>
-                    <td colSpan={7} className="border-b border-border bg-bg px-3.5 py-4">
+                    <td
+                      colSpan={creatorEmailById ? 8 : 7}
+                      className="border-b border-border bg-bg px-3.5 py-4"
+                    >
                       <EditForm link={link} />
                     </td>
                   </tr>
@@ -240,6 +268,26 @@ export function LinksList({ links }: { links: LinkItem[] }) {
         <BrandUrlModal link={brandTarget} onClose={() => setBrandTarget(null)} />
       )}
     </div>
+  );
+}
+
+function CopyIconButton({ slug }: { slug: string }) {
+  const { copied, copy } = useCopyFeedback();
+  const shortUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/${slug}` : "";
+
+  return (
+    <button
+      type="button"
+      title="복사"
+      onClick={() => copy(shortUrl)}
+      className={`inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium ${
+        copied ? "text-success" : "text-text-secondary"
+      }`}
+    >
+      <span aria-hidden="true">{copied ? "✓" : "⧉"}</span>
+      <span>{copied ? "복사됨" : "복사"}</span>
+    </button>
   );
 }
 
