@@ -3,10 +3,10 @@ import { SubmitButton } from "@/components/submit-button";
 import { verifyGatePassword } from "./actions";
 
 const fieldClass =
-  "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[15px] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
+  "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[0.9375rem] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
 const fieldErrClass =
-  "h-11 w-full rounded-sm border border-danger bg-white px-3.5 text-[15px] text-text-primary focus:outline-none";
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-text-primary";
+  "h-11 w-full rounded-sm border border-danger bg-white px-3.5 text-[0.9375rem] text-text-primary focus:outline-none";
+const labelClass = "mb-1.5 block text-[0.8125rem] font-semibold text-text-primary";
 
 export default async function GatePage({
   params,
@@ -20,7 +20,7 @@ export default async function GatePage({
 
   return (
     <div className="flex flex-1 flex-col items-center bg-bg px-4 py-14 sm:py-16">
-      <div className="w-full max-w-[360px]">
+      <div className="w-full max-w-[22.5rem]">
         <Logo />
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-subtle text-2xl text-accent">
           🔒
@@ -28,7 +28,7 @@ export default async function GatePage({
         <h1 className="mb-1 text-center text-2xl font-bold text-text-primary">
           비밀번호로 보호된 링크예요
         </h1>
-        <p className="mb-6 text-center text-[13px] text-text-secondary">
+        <p className="mb-6 text-center text-[0.8125rem] text-text-secondary">
           <span className="font-mono">j1n.uk/{slug}</span>
         </p>
 
@@ -47,7 +47,7 @@ export default async function GatePage({
               className={error ? fieldErrClass : fieldClass}
             />
             {error && (
-              <p className="mt-1.5 text-[13px] text-danger">
+              <p className="mt-1.5 text-[0.8125rem] text-danger">
                 비밀번호가 올바르지 않아요
               </p>
             )}

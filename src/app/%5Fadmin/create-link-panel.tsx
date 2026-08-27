@@ -18,8 +18,8 @@ function getOriginServerSnapshot() {
 }
 
 const fieldClass =
-  "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[15px] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-text-primary";
+  "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[0.9375rem] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
+const labelClass = "mb-1.5 block text-[0.8125rem] font-semibold text-text-primary";
 
 export function CreateLinkPanel({ error }: { error?: string }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
@@ -55,23 +55,23 @@ export function CreateLinkPanel({ error }: { error?: string }) {
   return (
     <div className="rounded-md border border-border bg-surface p-6 shadow-sm">
       {error && (
-        <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[13px] text-danger">
+        <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[0.8125rem] text-danger">
           {error}
         </div>
       )}
       {created && (
-        <div className="mb-4 flex flex-col gap-3 rounded-sm bg-success-subtle px-3.5 py-3 text-[13px] text-success">
+        <div className="mb-4 flex flex-col gap-3 rounded-sm bg-success-subtle px-3.5 py-3 text-[0.8125rem] text-success">
           <span>/{created} 생성됐어요</span>
           {shortUrl && (
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
               <div className="flex items-center gap-3">
                 <div className="rounded-md border border-border bg-white p-2">
-                  <QRCodeCanvas ref={qrRef} value={shortUrl} size={96} />
+                  <QRCodeCanvas ref={qrRef} value={shortUrl} size={144} />
                 </div>
                 <button
                   type="button"
                   onClick={handleDownloadQr}
-                  className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[13px] font-semibold text-text-primary hover:border-text-primary"
+                  className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[0.8125rem] font-semibold text-text-primary hover:border-text-primary"
                 >
                   QR 다운로드
                 </button>
@@ -83,7 +83,7 @@ export function CreateLinkPanel({ error }: { error?: string }) {
                 <button
                   type="button"
                   onClick={handleDownloadBrandImage}
-                  className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[13px] font-semibold text-text-primary hover:border-text-primary"
+                  className="inline-flex h-9 items-center justify-center rounded-sm border border-border-strong px-3.5 text-[0.8125rem] font-semibold text-text-primary hover:border-text-primary"
                 >
                   URL 이미지 다운로드
                 </button>
@@ -110,7 +110,7 @@ function CreateLinkFields({
 
   return (
     <form action={formAction} className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
-      <div className="min-w-[220px] flex-1">
+      <div className="min-w-[13.75rem] flex-1">
         <label className={labelClass}>대상 URL</label>
         <input
           name="targetUrl"
@@ -135,7 +135,7 @@ function CreateLinkFields({
             <select
               value={expiryPreset}
               onChange={(e) => setExpiryPreset(e.target.value as ExpiryPreset)}
-              className={`${fieldClass} !w-auto min-w-[92px]`}
+              className={`${fieldClass} !w-auto min-w-[5.75rem]`}
             >
               <option value="none">없음</option>
               <option value="1d">1일</option>

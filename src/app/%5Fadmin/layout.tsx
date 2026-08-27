@@ -26,7 +26,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex flex-1 flex-col bg-bg px-4 py-8 sm:px-6">
-      <div className="mx-auto w-full max-w-[960px]">
+      <div className="mx-auto w-full max-w-[60rem]">
         <header className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center">
@@ -44,7 +44,7 @@ export default async function AdminLayout({
             {isSuperAdmin && (
               <Link
                 href="/_admin/accounts"
-                className="text-[15px] font-semibold text-text-secondary hover:text-text-primary"
+                className="text-[0.9375rem] font-semibold text-text-secondary hover:text-text-primary"
               >
                 계정 관리
               </Link>
@@ -52,7 +52,7 @@ export default async function AdminLayout({
             <form action={signOut}>
               <button
                 type="submit"
-                className="text-[15px] font-semibold text-accent hover:underline"
+                className="text-[0.9375rem] font-semibold text-accent hover:underline"
               >
                 로그아웃
               </button>

@@ -51,8 +51,8 @@ export default async function AccountsPage() {
       <CreateAccountForm />
 
       <div className="overflow-hidden rounded-md border border-border bg-surface">
-        <table className="w-full text-left text-[14px]">
-          <thead className="bg-surface-dim text-[13px] text-text-secondary">
+        <table className="w-full text-left text-[0.875rem]">
+          <thead className="bg-surface-dim text-[0.8125rem] text-text-secondary">
             <tr>
               <th className="px-4 py-3 font-semibold">이메일</th>
               <th className="px-4 py-3 font-semibold">역할</th>

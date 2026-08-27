@@ -22,10 +22,10 @@ function formatDate(iso: string) {
 }
 
 const fieldClass =
-  "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[15px] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
+  "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[0.9375rem] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
 const fieldErrClass =
-  "h-11 w-full rounded-sm border border-danger bg-white px-3.5 text-[15px] text-text-primary focus:outline-none";
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-text-primary";
+  "h-11 w-full rounded-sm border border-danger bg-white px-3.5 text-[0.9375rem] text-text-primary focus:outline-none";
+const labelClass = "mb-1.5 block text-[0.8125rem] font-semibold text-text-primary";
 
 export function ShortenForm() {
   const [targetUrl, setTargetUrl] = useState("");
@@ -111,14 +111,14 @@ export function ShortenForm() {
 
   if (result) {
     return (
-      <div className="w-full max-w-[480px]">
+      <div className="w-full max-w-[30rem]">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-subtle text-2xl text-success">
           ✓
         </div>
         <h1 className="mb-1 text-center text-2xl font-bold text-text-primary">
           생성 완료
         </h1>
-        <p className="mb-6 text-center text-[15px] text-text-secondary">
+        <p className="mb-6 text-center text-[0.9375rem] text-text-secondary">
           링크가 준비됐어요
         </p>
 
@@ -141,16 +141,16 @@ export function ShortenForm() {
               </div>
 
               {copied ? (
-                <div className="mt-3 text-[13px] font-semibold text-success">
+                <div className="mt-3 text-[0.8125rem] font-semibold text-success">
                   복사됨!
                 </div>
               ) : (
-                <div className="mt-3 truncate text-[13px] text-text-secondary">
+                <div className="mt-3 truncate text-[0.8125rem] text-text-secondary">
                   원본: {result.targetUrl}
                 </div>
               )}
 
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-text-secondary">
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-[0.8125rem] text-text-secondary">
                 <span className="rounded-pill bg-accent-subtle px-2.5 py-0.5 text-xs font-medium text-accent">
                   활성
                 </span>
@@ -165,26 +165,26 @@ export function ShortenForm() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={handleCopy}
-                  className="inline-flex h-11 items-center justify-center rounded-sm bg-accent px-5 text-[15px] font-semibold text-white hover:bg-accent-hover"
+                  className="inline-flex h-11 items-center justify-center rounded-sm bg-accent px-5 text-[0.9375rem] font-semibold text-white hover:bg-accent-hover"
                 >
                   복사하기
                 </button>
                 <button
                   onClick={handleDownloadQr}
-                  className="inline-flex h-11 items-center justify-center rounded-sm border border-border-strong px-5 text-[15px] font-semibold text-text-primary hover:border-text-primary"
+                  className="inline-flex h-11 items-center justify-center rounded-sm border border-border-strong px-5 text-[0.9375rem] font-semibold text-text-primary hover:border-text-primary"
                 >
                   QR 다운로드
                 </button>
               </div>
             </div>
 
-            <div className="flex w-full items-center justify-center rounded-md border border-border bg-white p-4 sm:w-[180px] sm:shrink-0">
-              <QRCodeCanvas ref={qrRef} value={result.shortUrl} size={148} />
+            <div className="flex w-full items-center justify-center rounded-md border border-border bg-white p-4 sm:w-[11.25rem] sm:shrink-0">
+              <QRCodeCanvas ref={qrRef} value={result.shortUrl} size={222} />
             </div>
           </div>
         </div>
 
-        <div className="mt-6 text-center text-[13px]">
+        <div className="mt-6 text-center text-[0.8125rem]">
           <button
             onClick={handleReset}
             className="font-semibold text-accent hover:underline"
@@ -197,17 +197,17 @@ export function ShortenForm() {
   }
 
   return (
-    <div className="w-full max-w-[480px]">
+    <div className="w-full max-w-[30rem]">
       <h1 className="mb-1 text-center text-2xl font-bold text-text-primary">
         링크를 짧게
       </h1>
-      <p className="mb-6 text-center text-[15px] text-text-secondary">
+      <p className="mb-6 text-center text-[0.9375rem] text-text-secondary">
         긴 URL을 심플한 단축 링크와 QR코드로 만들어드려요
       </p>
 
       <div className="rounded-md border border-border bg-surface p-6 shadow-sm">
         {status === "server-error" && (
-          <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[13px] text-danger">
+          <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[0.8125rem] text-danger">
             일시적인 오류가 발생했어요. 다시 시도해주세요
           </div>
         )}
@@ -228,14 +228,14 @@ export function ShortenForm() {
               className={status === "invalid" ? fieldErrClass : fieldClass}
             />
             {status === "invalid" && (
-              <p className="mt-1.5 text-[13px] text-danger">
+              <p className="mt-1.5 text-[0.8125rem] text-danger">
                 올바른 URL 형식이 아니에요
               </p>
             )}
           </div>
 
           <details className="mb-4">
-            <summary className="cursor-pointer text-[13px] font-semibold text-text-secondary">
+            <summary className="cursor-pointer text-[0.8125rem] font-semibold text-text-secondary">
               옵션 (만료일 · 비밀번호)
             </summary>
             <div className="mt-3.5 flex flex-col gap-1">
@@ -265,7 +265,7 @@ export function ShortenForm() {
               </div>
 
               <div className="flex items-center justify-between py-2.5">
-                <span className="text-[14px] text-text-primary">비밀번호 보호</span>
+                <span className="text-[0.875rem] text-text-primary">비밀번호 보호</span>
                 <button
                   type="button"
                   role="switch"
@@ -277,8 +277,8 @@ export function ShortenForm() {
                   }`}
                 >
                   <span
-                    className={`absolute top-[3px] h-[18px] w-[18px] rounded-full bg-white transition-all ${
-                      passwordEnabled ? "left-[19px]" : "left-[3px]"
+                    className={`absolute top-[0.1875rem] h-[1.125rem] w-[1.125rem] rounded-full bg-white transition-all ${
+                      passwordEnabled ? "left-[1.1875rem]" : "left-[0.1875rem]"
                     }`}
                   />
                 </button>
@@ -299,7 +299,7 @@ export function ShortenForm() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-accent text-[15px] font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-surface-dim disabled:text-text-disabled"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-accent text-[0.9375rem] font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-surface-dim disabled:text-text-disabled"
           >
             {status === "loading" && (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -309,7 +309,7 @@ export function ShortenForm() {
         </form>
       </div>
 
-      <div className="mt-6 text-center text-[13px] text-text-secondary">
+      <div className="mt-6 text-center text-[0.8125rem] text-text-secondary">
         관리자이신가요?{" "}
         <Link href="/_login" className="font-semibold text-accent hover:underline">
           로그인
