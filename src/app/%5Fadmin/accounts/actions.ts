@@ -56,8 +56,21 @@ export async function createAdminAccount(
   });
 
   if (profileError) {
+    // Auth user creation and the profiles insert aren't one atomic
+    // transaction (different services), so a failure here would otherwise
+    // leave a half-created account: an Auth user with no role, which also
+    // blocks retrying with the same email. Compensate by deleting the Auth
+    // user we just created instead of leaving that dangling state.
+    const { error: cleanupError } = await admin.auth.admin.deleteUser(data.user.id);
+
+    if (cleanupError) {
+      return {
+        error: `계정 생성 중 오류가 발생했고 되돌리기도 실패했습니다. Supabase 대시보드 > Authentication > Users에서 ${email} 계정을 직접 확인/삭제해주세요. (원인: ${profileError.message} / 롤백 실패: ${cleanupError.message})`,
+      };
+    }
+
     return {
-      error: `계정은 생성됐지만 권한 정보 저장에 실패했습니다(${profileError.message}). 다시 시도하기 전에 Supabase 대시보드에서 이 계정을 확인해주세요.`,
+      error: `계정 생성 중 오류가 발생해 되돌렸습니다. 다시 시도해주세요. (${profileError.message})`,
     };
   }
 
