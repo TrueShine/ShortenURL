@@ -54,7 +54,7 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+      className={`-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-[0.875rem] font-semibold transition-colors ${
         active
           ? "border-accent text-accent"
           : "border-transparent text-text-secondary hover:text-text-primary"
