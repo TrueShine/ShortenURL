@@ -113,7 +113,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
               클릭 {link.clicks?.[0]?.count ?? 0} · 생성 {formatDate(link.created_at)} · 만료{" "}
               {link.expires_at ? formatDate(link.expires_at) : "없음"}
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                 ▦
               </IconButton>
@@ -200,7 +200,7 @@ export function LinksList({ links }: { links: LinkItem[] }) {
                     {statusBadge(link)}
                   </td>
                   <td className="border-b border-border px-3.5 py-3 text-sm">
-                    <div className="flex gap-1.5">
+                    <div className="flex flex-wrap gap-1.5">
                       <IconButton label="QR 보기" onClick={() => setQrTarget(link)}>
                         ▦
                       </IconButton>
@@ -259,11 +259,12 @@ function IconButton({
       type="button"
       title={label}
       onClick={onClick}
-      className={`flex h-8 w-8 items-center justify-center rounded-md border border-border bg-white text-sm ${
+      className={`inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium ${
         danger ? "text-danger" : "text-text-secondary"
       }`}
     >
-      {children}
+      <span aria-hidden="true">{children}</span>
+      <span>{label}</span>
     </button>
   );
 }

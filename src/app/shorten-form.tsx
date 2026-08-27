@@ -132,11 +132,12 @@ export function ShortenForm() {
                 <button
                   onClick={handleCopy}
                   title="복사"
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-white ${
+                  className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-white ${
                     copied ? "bg-success" : "bg-white/10"
                   }`}
                 >
-                  {copied ? "✓" : "⧉"}
+                  <span aria-hidden="true">{copied ? "✓" : "⧉"}</span>
+                  <span>{copied ? "복사됨" : "복사"}</span>
                 </button>
               </div>
 
