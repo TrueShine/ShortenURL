@@ -47,6 +47,7 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 const ADMIN_ROLES = new Set(["super_admin", "admin"]);
+const CHANGE_PASSWORD_PATH = "/_admin/change-password";
 
 async function guardAdmin(request: NextRequest) {
   const { supabase, getResponse } = createProxyClient(request);
@@ -60,7 +61,7 @@ async function guardAdmin(request: NextRequest) {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, must_change_password")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -75,6 +76,15 @@ async function guardAdmin(request: NextRequest) {
       .cookies.getAll()
       .forEach((cookie) => redirectResponse.cookies.set(cookie));
     return redirectResponse;
+  }
+
+  // Force accounts issued by a super_admin (must_change_password=true, see
+  // _admin/accounts) through the change-password screen before anything
+  // else in /_admin — checked here rather than in the shared layout because
+  // the layout re-renders around change-password's own page too, which
+  // would loop; middleware can see the pathname and exempt it.
+  if (profile.must_change_password && request.nextUrl.pathname !== CHANGE_PASSWORD_PATH) {
+    return NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, request.url));
   }
 
   return getResponse();
