@@ -8,8 +8,6 @@ import {
   type ResetPasswordState,
 } from "./actions";
 
-const initialResetState: ResetPasswordState = {};
-
 const actionButtonClass =
   "inline-flex h-8 items-center whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40";
 
@@ -22,7 +20,6 @@ export function AccountActions({
   email: string;
   isSelf: boolean;
 }) {
-  const [resetState, resetAction] = useActionState(resetAdminPassword, initialResetState);
   const [showReset, setShowReset] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
@@ -51,8 +48,6 @@ export function AccountActions({
         <ResetPasswordModal
           email={email}
           accountId={accountId}
-          state={resetState}
-          formAction={resetAction}
           onClose={() => setShowReset(false)}
         />
       )}
@@ -71,16 +66,17 @@ export function AccountActions({
 function ResetPasswordModal({
   email,
   accountId,
-  state,
-  formAction,
   onClose,
 }: {
   email: string;
   accountId: string;
-  state: ResetPasswordState;
-  formAction: (formData: FormData) => void;
   onClose: () => void;
 }) {
+  const [state, formAction] = useActionState<ResetPasswordState, FormData>(
+    resetAdminPassword,
+    {}
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
       <div className="w-full max-w-[24rem] rounded-lg bg-white p-6 shadow-md">

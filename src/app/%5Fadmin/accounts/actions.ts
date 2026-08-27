@@ -97,17 +97,26 @@ export async function resetAdminPassword(
     return { error: "잘못된 요청입니다." };
   }
 
-  const tempPassword = generateTempPassword();
   const admin = createAdminClient();
 
-  const { error: authError } = await admin.auth.admin.updateUserById(accountId, {
-    password: tempPassword,
-  });
+  // Only ever act on ids that are actually a managed admin account — a
+  // super_admin submitting this form directly could otherwise point it at
+  // any auth.users id, admin account or not.
+  const { data: targetProfile } = await admin
+    .from("profiles")
+    .select("id, must_change_password")
+    .eq("id", accountId)
+    .maybeSingle();
 
-  if (authError) {
-    return { error: authError.message };
+  if (!targetProfile) {
+    return { error: "관리자 계정 목록에 없는 대상입니다." };
   }
 
+  const previousMustChangePassword = targetProfile.must_change_password;
+
+  // Flip the flag before touching the real password: if this update fails,
+  // nothing about the account's actual credentials changed yet, so there's
+  // nothing to roll back and no orphaned temp password to lose.
   const { error: profileError } = await admin
     .from("profiles")
     .update({ must_change_password: true })
@@ -115,6 +124,28 @@ export async function resetAdminPassword(
 
   if (profileError) {
     return { error: profileError.message };
+  }
+
+  const tempPassword = generateTempPassword();
+  const { error: authError } = await admin.auth.admin.updateUserById(accountId, {
+    password: tempPassword,
+  });
+
+  if (authError) {
+    // The password change didn't actually happen, so the forced-change flag
+    // we just set would be a lie — put it back the way it was.
+    const { error: rollbackError } = await admin
+      .from("profiles")
+      .update({ must_change_password: previousMustChangePassword })
+      .eq("id", accountId);
+
+    if (rollbackError) {
+      return {
+        error: `비밀번호 변경에 실패했고 상태 되돌리기도 실패했습니다. Supabase 대시보드에서 해당 계정의 must_change_password 값을 직접 확인해주세요. (원인: ${authError.message} / 롤백 실패: ${rollbackError.message})`,
+      };
+    }
+
+    return { error: authError.message };
   }
 
   revalidatePath("/_admin/accounts");
@@ -132,13 +163,25 @@ export async function deleteAdminAccount(formData: FormData) {
     redirect(`/_admin/accounts?error=${encodeURIComponent("잘못된 요청입니다.")}`);
   }
 
+  const admin = createAdminClient();
+
+  // Only ever act on ids that are actually a managed admin account — see the
+  // matching comment in resetAdminPassword above.
+  const { data: targetProfile } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("id", accountId)
+    .maybeSingle();
+
+  if (!targetProfile) {
+    redirect(`/_admin/accounts?error=${encodeURIComponent("관리자 계정 목록에 없는 대상입니다.")}`);
+  }
+
   if (accountId === user.id) {
     redirect(
       `/_admin/accounts?error=${encodeURIComponent("본인(슈퍼관리자) 계정은 삭제할 수 없습니다.")}`
     );
   }
-
-  const admin = createAdminClient();
 
   // profiles row cascades away via its FK to auth.users (see
   // 0003_role_based_access.sql), and links.created_by is set to null via its
