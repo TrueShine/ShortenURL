@@ -46,6 +46,8 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   return resolveSlugRedirect(request, event, first);
 }
 
+const ADMIN_ROLES = new Set(["super_admin", "admin"]);
+
 async function guardAdmin(request: NextRequest) {
   const { supabase, getResponse } = createProxyClient(request);
   const {
@@ -54,6 +56,25 @@ async function guardAdmin(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(new URL("/_login", request.url));
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  // Fail closed: a query error, a missing profile row (e.g. an auth user
+  // left behind by a partially-failed account-creation rollback, see
+  // _admin/accounts/actions.ts), or a role outside the known set must never
+  // fall through to "allowed" — only an explicit, recognized role does.
+  if (profileError || !profile || !ADMIN_ROLES.has(profile.role)) {
+    await supabase.auth.signOut();
+    const redirectResponse = NextResponse.redirect(new URL("/_login", request.url));
+    getResponse()
+      .cookies.getAll()
+      .forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   return getResponse();

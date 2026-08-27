@@ -58,6 +58,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Being logged in isn't enough — an authenticated Supabase user with no
+    // (or an unrecognized) profiles.role must not be able to create links
+    // just by calling this API directly with a valid session. Checked here
+    // explicitly in addition to the RLS policy on links.insert, since this
+    // route otherwise only relied on "logged in" the way the RLS policy
+    // used to.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "관리자 계정만 커스텀 alias를 사용할 수 있습니다." },
+        { status: 403 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("links")
       .insert({
