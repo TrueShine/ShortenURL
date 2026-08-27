@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git fetch origin web2/admin-list-copy-creator && git branch --set-upstream-to=origin/web2/admin-list-copy-creator web2/admin-list-copy-creator\"}",
-  "error": "Exit code 128\nFrom https://github.com/TrueShine/ShortenURL\n * branch            web2/admin-list-copy-creator -> FETCH_HEAD\nfatal: the requested upstream branch 'origin/web2/admin-list-copy-creator' does not exist\nhint:\nhint: If you are planning on basing your work on an upstream\nhint: branch that already exists at the remote, you may need to\nhint: run \"git fetch\" to retrieve it.\nhint:\nhint: If you are planning to push out a new local branch that\nhint: will track its remote counterpart, you may w...",
-  "timestamp": "2026-08-27T04:54:29.095Z",
-  "retry_count": 3
-}
