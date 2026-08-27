@@ -9,9 +9,11 @@ type Tab = "create" | "admin" | "other";
 export function AdminTabs({
   error,
   links,
+  creatorEmailById,
 }: {
   error?: string;
   links: LinkItem[];
+  creatorEmailById?: Record<string, string>;
 }) {
   const [tab, setTab] = useState<Tab>(error ? "create" : "admin");
 
@@ -33,7 +35,9 @@ export function AdminTabs({
       </div>
 
       {tab === "create" && <CreateLinkPanel error={error} />}
-      {tab === "admin" && <LinksList links={adminLinks} />}
+      {tab === "admin" && (
+        <LinksList links={adminLinks} creatorEmailById={creatorEmailById} />
+      )}
       {tab === "other" && <LinksList links={otherLinks} />}
     </div>
   );

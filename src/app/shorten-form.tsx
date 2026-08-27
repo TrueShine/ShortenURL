@@ -5,6 +5,7 @@ import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
 import { normalizeTargetUrl } from "@/lib/url";
 import { presetToIsoDate, type ExpiryPreset } from "@/lib/expiry";
+import { useCopyFeedback } from "@/lib/use-copy-feedback";
 
 type CreateLinkResult = {
   slug: string;
@@ -38,7 +39,7 @@ export function ShortenForm() {
     "idle"
   );
   const [result, setResult] = useState<CreateLinkResult | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyFeedback();
   const qrRef = useRef<HTMLCanvasElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -83,11 +84,9 @@ export function ShortenForm() {
     }
   }
 
-  async function handleCopy() {
+  function handleCopy() {
     if (!result) return;
-    await navigator.clipboard.writeText(result.shortUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copy(result.shortUrl);
   }
 
   function handleDownloadQr() {

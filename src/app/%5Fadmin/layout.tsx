@@ -26,7 +26,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex flex-1 flex-col bg-bg px-4 py-8 sm:px-6">
-      <div className="mx-auto w-full max-w-[60rem]">
+      <div className="w-full">
         <header className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center">

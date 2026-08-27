@@ -18,3 +18,24 @@ export function createAdminClient() {
     }
   );
 }
+
+// auth.admin.listUsers() only returns one page (50 users by default) —
+// walk every page so accounts past the first page don't show up as
+// missing once there are more than a handful of admins.
+export async function listAllUserEmails(admin: ReturnType<typeof createAdminClient>) {
+  const perPage = 200;
+  const emailById = new Map<string, string | undefined>();
+
+  for (let page = 1; ; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+    if (error || !data) break;
+
+    for (const user of data.users) {
+      emailById.set(user.id, user.email);
+    }
+
+    if (data.users.length < perPage) break;
+  }
+
+  return emailById;
+}
