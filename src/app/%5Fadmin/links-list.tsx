@@ -432,14 +432,14 @@ function BrandUrlModal({ link, onClose }: { link: LinkItem; onClose: () => void 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#111113]/40 px-4 pb-4 pt-[10vh]">
-      <div className="w-full max-w-[26.25rem] rounded-lg bg-white p-6 shadow-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111113]/40 p-4">
+      <div className="flex h-[92vh] w-[95vw] flex-col rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-2 text-lg font-bold text-text-primary">URL 이미지</h2>
         <p className="mb-4 text-sm text-text-secondary">
           <span className="font-mono">j1n.uk/{link.slug}</span>
         </p>
-        <div className="flex items-center justify-center overflow-x-auto rounded-md border border-border bg-white p-4">
-          {shortUrl && <BrandUrlCanvas ref={brandRef} url={shortUrl} />}
+        <div className="min-h-0 flex-1 rounded-md border border-border bg-white p-4">
+          {shortUrl && <BrandUrlCanvas ref={brandRef} url={shortUrl} fit />}
         </div>
         <div className="mt-5 flex gap-2">
           <button
