@@ -45,8 +45,10 @@ export type BrandUrlCanvasHandle = {
   getDataURL: () => Promise<string | null>;
 };
 
-export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
-  function BrandUrlCanvas({ url }, ref) {
+export const BrandUrlCanvas = forwardRef<
+  BrandUrlCanvasHandle,
+  { url: string; fit?: boolean }
+>(function BrandUrlCanvas({ url, fit = false }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const readyRef = useRef<Promise<void>>(Promise.resolve());
 
@@ -77,8 +79,15 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
 
         canvas!.width = Math.ceil(width * SCALE);
         canvas!.height = Math.ceil(height * SCALE);
-        canvas!.style.width = `${width}px`;
-        canvas!.style.height = `${height}px`;
+        if (fit) {
+          // Let the parent control display size via CSS (object-fit: contain);
+          // the width/height attrs above still define the intrinsic aspect ratio.
+          canvas!.style.removeProperty("width");
+          canvas!.style.removeProperty("height");
+        } else {
+          canvas!.style.width = `${width}px`;
+          canvas!.style.height = `${height}px`;
+        }
 
         ctx!.scale(SCALE, SCALE);
 
@@ -108,8 +117,13 @@ export const BrandUrlCanvas = forwardRef<BrandUrlCanvasHandle, { url: string }>(
           : Promise.resolve();
 
       readyRef.current = fontsReady.then(draw);
-    }, [url]);
+    }, [url, fit]);
 
-    return <canvas ref={canvasRef} className="max-w-full" />;
+    return (
+      <canvas
+        ref={canvasRef}
+        className={fit ? "h-full w-full object-contain" : "max-w-full"}
+      />
+    );
   }
 );
