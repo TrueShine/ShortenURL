@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
+  other: {
+    "google-adsense-account": "ca-pub-5996415121817335",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
