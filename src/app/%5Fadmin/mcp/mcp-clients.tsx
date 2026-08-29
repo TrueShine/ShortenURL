@@ -365,9 +365,12 @@ export function McpPanel() {
               <McpServerUrlCopyButton />
             </span>
           </li>
-          <li>3. 필요 시 위에서 발급받은 client ID/secret 입력</li>
-          <li>4. 로그인 후 &ldquo;허용&rdquo; 승인</li>
+          <li>3. 로그인 후 &ldquo;허용&rdquo; 승인 — 자동으로 연결돼요</li>
         </ol>
+        <p className="mt-3 text-[0.8125rem] text-text-secondary">
+          위 클라이언트 목록/등록은 연결에 필수가 아니라, 발급된 커넥터를
+          관리하거나 폐기할 때만 사용하는 옵션이에요.
+        </p>
       </div>
     </div>
   );
