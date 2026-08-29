@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
 
 type McpClient = {
@@ -50,28 +50,29 @@ export function McpClients() {
   const [revoking, setRevoking] = useState(false);
   const [revokeError, setRevokeError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  // GET 응답은 마운트 시 1회, POST/DELETE는 그 뒤 임의 시점에 완료된다.
+  // 늦게 도착한 GET 응답이 이미 반영된 등록/폐기 결과를 덮어쓰지 않도록
+  // 매 요청에 순번을 매기고, 최신 순번의 응답만 상태에 반영한다.
+  const loadSeqRef = useRef(0);
 
+  useEffect(() => {
     async function load() {
+      const seq = ++loadSeqRef.current;
       setLoadError(null);
       try {
         const res = await fetch(API_BASE, { credentials: "same-origin" });
         if (!res.ok) throw new Error(await parseErrorMessage(res));
         const payload = await res.json();
-        if (!cancelled) setClients(extractClients(payload));
+        if (loadSeqRef.current === seq) setClients(extractClients(payload));
       } catch (err) {
-        if (!cancelled) {
-          setClients([]);
+        if (loadSeqRef.current === seq) {
+          setClients((prev) => prev ?? []);
           setLoadError(err instanceof Error ? err.message : "클라이언트 목록을 불러오지 못했어요.");
         }
       }
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   async function handleRegister(formData: FormData) {
@@ -95,6 +96,10 @@ export function McpClients() {
       if (!res.ok) throw new Error(await parseErrorMessage(res));
 
       const created = await res.json();
+      // 아직 응답이 안 돌아온 이전 GET이 있다면 무효화 — 그 결과가 나중에
+      // 도착해도 방금 등록한 클라이언트를 목록에서 지우지 못하게 한다.
+      loadSeqRef.current++;
+      setLoadError(null);
       setClients((prev) => [created, ...(prev ?? [])]);
       setNewSecret({ name: created.name, secret: created.client_secret });
     } catch (err) {
@@ -114,6 +119,8 @@ export function McpClients() {
       });
       if (!res.ok) throw new Error(await parseErrorMessage(res));
 
+      loadSeqRef.current++;
+      setLoadError(null);
       setClients((prev) =>
         (prev ?? []).map((c) =>
           c.id === target.id ? { ...c, revoked_at: new Date().toISOString() } : c
