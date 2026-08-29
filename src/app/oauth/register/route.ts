@@ -7,10 +7,15 @@ const MAX_CLIENT_ID_ATTEMPTS = 5;
 const MAX_CLIENT_NAME_LENGTH = 200;
 const MAX_REDIRECT_URIS = 10;
 
+// RFC 7591 §3.2.1's client information response carries a plaintext
+// client_secret and is explicitly specced with these headers so it never
+// gets cached by a browser or intermediate proxy.
+const NO_STORE_HEADERS = { "Cache-Control": "no-store", Pragma: "no-cache" };
+
 function registrationError(error: string, status: number, description?: string) {
   return NextResponse.json(
     { error, ...(description ? { error_description: description } : {}) },
-    { status }
+    { status, headers: NO_STORE_HEADERS }
   );
 }
 
@@ -106,7 +111,7 @@ export async function POST(request: Request) {
           response_types: ["code"],
           token_endpoint_auth_method: "client_secret_post",
         },
-        { status: 201 }
+        { status: 201, headers: NO_STORE_HEADERS }
       );
     }
 
