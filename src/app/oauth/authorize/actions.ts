@@ -4,7 +4,10 @@ import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkAdminRole } from "@/lib/admin-guard";
 import { AUTHORIZATION_CODE_TTL_MS, MCP_SCOPE } from "@/lib/oauth/jwt";
+
+const CHANGE_PASSWORD_PATH = "/_admin/change-password";
 
 export async function decideAuthorization(formData: FormData) {
   const supabase = await createClient();
@@ -14,6 +17,14 @@ export async function decideAuthorization(formData: FormData) {
 
   if (!user) {
     redirect("/_login");
+  }
+
+  // Re-validated here regardless of what the page rendered — a POST to a
+  // Server Action can be issued directly, bypassing the page's own role
+  // check, the same way client_id/redirect_uri are re-checked below.
+  const roleCheck = await checkAdminRole(supabase, user.id);
+  if (!roleCheck.ok) {
+    redirect(roleCheck.reason === "must_change_password" ? CHANGE_PASSWORD_PATH : "/_login");
   }
 
   const clientId = String(formData.get("client_id") ?? "");

@@ -2,8 +2,11 @@ import { redirect } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkAdminRole } from "@/lib/admin-guard";
 import { MCP_SCOPE } from "@/lib/oauth/jwt";
 import { decideAuthorization } from "./actions";
+
+const CHANGE_PASSWORD_PATH = "/_admin/change-password";
 
 type AuthorizeParams = {
   response_type?: string;
@@ -37,6 +40,17 @@ export default async function AuthorizePage({
   if (!user) {
     const redirectTarget = `/oauth/authorize?${buildQueryString(params)}`;
     redirect(`/_login?redirect=${encodeURIComponent(redirectTarget)}`);
+  }
+
+  // MCP tools operate on the admin's own links via the service-role client
+  // (see lib/mcp/tools.ts), so only admin/super_admin accounts may reach the
+  // consent screen at all — a regular logged-in user must never get this far.
+  const roleCheck = await checkAdminRole(supabase, user.id);
+  if (!roleCheck.ok) {
+    if (roleCheck.reason === "must_change_password") {
+      redirect(CHANGE_PASSWORD_PATH);
+    }
+    return <ErrorCard message="관리자 권한이 필요합니다." />;
   }
 
   const { client_id: clientId, redirect_uri: redirectUri } = params;
