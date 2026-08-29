@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { CreateLinkPanel } from "./create-link-panel";
 import { LinksList, type LinkItem } from "./links-list";
-import { McpPanel } from "./mcp/page";
+import { McpPanel } from "./mcp/mcp-clients";
 
 type Tab = "create" | "admin" | "other" | "mcp" | "accounts";
 
