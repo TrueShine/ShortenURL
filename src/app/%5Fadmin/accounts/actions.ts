@@ -76,6 +76,10 @@ export async function createAdminAccount(
     };
   }
 
+  // 실제 계정관리 화면은 이제 /_admin 탭 안에 있으므로 그 경로도 재검증한다.
+  // /_admin/accounts는 그 라우트를 직접 방문했을 때를 위해 그대로 유지.
+  revalidatePath("/_admin");
+  revalidatePath("/_admin/accounts");
   return { created: { email, password: tempPassword } };
 }
 
@@ -148,6 +152,7 @@ export async function resetAdminPassword(
     return { error: authError.message };
   }
 
+  revalidatePath("/_admin");
   revalidatePath("/_admin/accounts");
   return { created: { password: tempPassword } };
 }
@@ -193,5 +198,6 @@ export async function deleteAdminAccount(formData: FormData) {
     redirect(`/_admin/accounts?error=${encodeURIComponent(error.message)}`);
   }
 
+  revalidatePath("/_admin");
   revalidatePath("/_admin/accounts");
 }
