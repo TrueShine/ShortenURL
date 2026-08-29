@@ -118,24 +118,41 @@ export async function POST(request: Request) {
       return oauthError("invalid_request", 400);
     }
 
-    // Single-use: the update below only succeeds while used=false, so a
-    // concurrent or repeated redemption of the same code loses the race
-    // and gets invalid_grant instead of a second valid token pair.
+    // Validate every binding condition — including PKCE — on a read-only
+    // lookup first. Marking the code used before this check would let a
+    // request that merely holds a valid client_secret (but the wrong
+    // code_verifier or redirect_uri) burn the code before the legitimate
+    // client, with the correct verifier, ever gets to redeem it.
+    const { data: codeRow } = await admin
+      .from("oauth_authorization_codes")
+      .select("client_id, redirect_uri, code_challenge, scope, user_id, expires_at, used")
+      .eq("code", code)
+      .maybeSingle();
+
+    if (
+      !codeRow ||
+      codeRow.used ||
+      codeRow.client_id !== client.id ||
+      codeRow.redirect_uri !== redirectUri ||
+      new Date(codeRow.expires_at).getTime() < Date.now() ||
+      !verifyPkce(codeVerifier, codeRow.code_challenge)
+    ) {
+      return oauthError("invalid_grant", 400);
+    }
+
+    // Only claim (mark used) now that every check above passed. The
+    // used=false condition here is what makes two concurrent requests that
+    // both passed those checks (e.g. a duplicated retry) resolve to
+    // exactly one winner — the loser gets 0 rows back and invalid_grant.
     const { data: redeemed } = await admin
       .from("oauth_authorization_codes")
       .update({ used: true })
       .eq("code", code)
       .eq("used", false)
-      .select("client_id, redirect_uri, code_challenge, scope, user_id, expires_at")
+      .select("user_id, scope")
       .maybeSingle();
 
-    if (
-      !redeemed ||
-      redeemed.client_id !== client.id ||
-      redeemed.redirect_uri !== redirectUri ||
-      new Date(redeemed.expires_at).getTime() < Date.now() ||
-      !verifyPkce(codeVerifier, redeemed.code_challenge)
-    ) {
+    if (!redeemed) {
       return oauthError("invalid_grant", 400);
     }
 
@@ -175,47 +192,43 @@ export async function POST(request: Request) {
   }
 
   const tokenHash = hashRefreshToken(refreshToken);
+  const nowIso = new Date().toISOString();
 
-  const { data: existing } = await admin
+  // Rotate on every use: the WHERE clause here does validation (right
+  // client, not already revoked, not expired) and claiming (the actual
+  // revoke) in one atomic UPDATE, so two concurrent requests presenting the
+  // same refresh token can't both read "still valid" and then both mint a
+  // new token pair — only the one whose UPDATE actually matches a row (and
+  // gets it back via .select()) wins; the other gets 0 rows back.
+  const { data: claimed, error: claimError } = await admin
     .from("oauth_refresh_tokens")
-    .select("client_id, user_id, scope, expires_at, revoked_at")
+    .update({ revoked_at: nowIso })
     .eq("token_hash", tokenHash)
+    .eq("client_id", client.id)
+    .is("revoked_at", null)
+    .gt("expires_at", nowIso)
+    .select("user_id, scope")
     .maybeSingle();
 
-  if (
-    !existing ||
-    existing.revoked_at ||
-    existing.client_id !== client.id ||
-    new Date(existing.expires_at).getTime() < Date.now()
-  ) {
+  if (claimError) {
+    return oauthError("server_error", 500, claimError.message);
+  }
+  if (!claimed) {
     return oauthError("invalid_grant", 400);
   }
 
-  // Rotate on every use: revoke the presented refresh token and issue a
-  // fresh one, so a leaked-but-unused-yet token stops working the moment
-  // the legitimate client refreshes, instead of staying valid for 90 days.
   const newRefreshToken = generateRefreshToken();
-
-  const { error: revokeError } = await admin
-    .from("oauth_refresh_tokens")
-    .update({ revoked_at: new Date().toISOString() })
-    .eq("token_hash", tokenHash)
-    .is("revoked_at", null);
-
-  if (revokeError) {
-    return oauthError("server_error", 500, revokeError.message);
-  }
 
   const [accessToken, insertResult] = await Promise.all([
     signAccessToken(
-      { clientId: client.id, userId: existing.user_id, scope: existing.scope },
+      { clientId: client.id, userId: claimed.user_id, scope: claimed.scope },
       issuer
     ),
     admin.from("oauth_refresh_tokens").insert({
       token_hash: hashRefreshToken(newRefreshToken),
       client_id: client.id,
-      user_id: existing.user_id,
-      scope: existing.scope,
+      user_id: claimed.user_id,
+      scope: claimed.scope,
       expires_at: new Date(Date.now() + REFRESH_TOKEN_TTL_MS).toISOString(),
     }),
   ]);
@@ -232,6 +245,6 @@ export async function POST(request: Request) {
     token_type: "Bearer",
     expires_in: ACCESS_TOKEN_TTL_SECONDS,
     refresh_token: newRefreshToken,
-    scope: existing.scope,
+    scope: claimed.scope,
   });
 }
