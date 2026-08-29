@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
+import { useCopyFeedback } from "@/lib/use-copy-feedback";
 
 type McpClient = {
   id: string;
@@ -320,5 +321,54 @@ export function McpClients() {
         </div>
       )}
     </>
+  );
+}
+
+// Lives here (not in page.tsx) so admin-tabs.tsx can render it inline for
+// the "mcp" tab without importing from a page.tsx module — Next.js's
+// typed-routes generator only allows page.tsx to export `default` and a
+// fixed set of recognized names (metadata, generateStaticParams, ...), so
+// re-exporting an arbitrary named component from there fails type checking.
+const MCP_SERVER_URL = "https://j1n.uk/api/mcp";
+
+function McpServerUrlCopyButton() {
+  const { copied, copy } = useCopyFeedback();
+
+  return (
+    <button
+      type="button"
+      onClick={() => copy(MCP_SERVER_URL)}
+      className="inline-flex h-7 items-center whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium text-text-primary hover:border-text-primary"
+    >
+      {copied ? "복사됨" : "복사"}
+    </button>
+  );
+}
+
+export function McpPanel() {
+  return (
+    <div className="flex flex-col gap-6">
+      <McpClients />
+
+      <div className="rounded-md border border-border bg-surface p-6 shadow-sm">
+        <h2 className="mb-3 text-[0.9375rem] font-semibold text-text-primary">
+          Claude에 연결하는 방법
+        </h2>
+        <ol className="flex flex-col gap-2 text-[0.875rem] text-text-secondary">
+          <li>1. Claude 설정 → 커넥터 → 사용자 지정 커넥터 추가</li>
+          <li>
+            2. MCP 서버 URL:{" "}
+            <span className="inline-flex items-center gap-1.5">
+              <code className="rounded-sm bg-surface-dim px-1.5 py-0.5 font-mono text-[0.8125rem] text-text-primary">
+                {MCP_SERVER_URL}
+              </code>
+              <McpServerUrlCopyButton />
+            </span>
+          </li>
+          <li>3. 필요 시 위에서 발급받은 client ID/secret 입력</li>
+          <li>4. 로그인 후 &ldquo;허용&rdquo; 승인</li>
+        </ol>
+      </div>
+    </div>
   );
 }
