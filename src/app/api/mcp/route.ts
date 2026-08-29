@@ -35,6 +35,22 @@ async function authenticate(request: Request, issuer: string): Promise<AuthResul
   }
 
   const admin = createAdminClient();
+
+  // JWTs carry no live DB check by design (see verifyAccessToken), so a
+  // revoked client's already-issued tokens would otherwise keep working
+  // for up to their full 1h TTL after DELETE /api/admin/mcp-clients/:id.
+  // Reject here so revocation actually takes effect immediately.
+  const { data: client } = await admin
+    .from("oauth_clients")
+    .select("id")
+    .eq("id", claims.clientId)
+    .is("revoked_at", null)
+    .maybeSingle();
+
+  if (!client) {
+    return { response: unauthorized() };
+  }
+
   const { data: profile } = await admin
     .from("profiles")
     .select("role, must_change_password")
