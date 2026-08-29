@@ -6,6 +6,11 @@ import { generateClientId, isValidRedirectUri } from "@/lib/oauth/client";
 
 const MAX_CLIENT_ID_ATTEMPTS = 5;
 
+// RFC 7591 §3.2.1's client information response carries a plaintext
+// client_secret and is specced with these headers so it never gets cached
+// by a browser or intermediate proxy (see also oauth/register/route.ts).
+const NO_STORE_HEADERS = { "Cache-Control": "no-store", Pragma: "no-cache" };
+
 export async function GET() {
   const guard = await requireAdminApi();
   if (guard.error) return guard.error;
@@ -76,7 +81,10 @@ export async function POST(request: Request) {
     if (!error) {
       // client_secret is only ever returned here, in plaintext, once —
       // only the hash is persisted (see 0006_mcp_oauth.sql).
-      return NextResponse.json({ ...data, client_secret: clientSecret }, { status: 201 });
+      return NextResponse.json(
+        { ...data, client_secret: clientSecret },
+        { status: 201, headers: NO_STORE_HEADERS }
+      );
     }
 
     if (error.code !== "23505") {
