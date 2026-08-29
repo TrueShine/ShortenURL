@@ -7,14 +7,6 @@ const MAX_CLIENT_ID_ATTEMPTS = 5;
 const MAX_CLIENT_NAME_LENGTH = 200;
 const MAX_REDIRECT_URIS = 10;
 
-// No shared state exists to rate-limit against across invocations (see the
-// statelessness note in api/mcp/route.ts — this app is serverless on
-// Vercel), so abuse is bounded with a DB-backed check instead: an
-// in-memory-per-instance counter would just reset on every cold start and
-// miss most requests entirely.
-const REGISTRATIONS_PER_WINDOW = 20;
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-
 function registrationError(error: string, status: number, description?: string) {
   return NextResponse.json(
     { error, ...(description ? { error_description: description } : {}) },
@@ -33,12 +25,21 @@ type RegisterBody = {
 // admin login + consent step that /oauth/authorize still requires before
 // any actual access is granted.
 export async function POST(request: Request) {
-  let body: RegisterBody;
+  let parsed: unknown;
   try {
-    body = await request.json();
+    parsed = await request.json();
   } catch {
     return registrationError("invalid_client_metadata", 400, "잘못된 요청 본문입니다.");
   }
+
+  // request.json() happily returns null/an array/a primitive for bodies
+  // like "null" or "[]" — reject anything that isn't a plain object before
+  // touching its properties, since this route (unlike the admin-only
+  // mcp-clients route) is open to unauthenticated callers.
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return registrationError("invalid_client_metadata", 400, "잘못된 요청 본문입니다.");
+  }
+  const body = parsed as RegisterBody;
 
   const clientName = typeof body.client_name === "string" ? body.client_name.trim() : "";
   if (!clientName || clientName.length > MAX_CLIENT_NAME_LENGTH) {
@@ -63,26 +64,14 @@ export async function POST(request: Request) {
     );
   }
 
+  // A count-then-insert throttle here would race under concurrent requests
+  // (every request can read "under the limit" before any of them commits
+  // its insert) without a shared, atomic counter this app has no infra
+  // for — see api/mcp/route.ts's statelessness note. Abuse resistance for
+  // this unauthenticated endpoint rests on redirect_uris/client_name
+  // format validation above instead; a real distributed rate limit would
+  // need shared infra (e.g. Upstash Redis) this app doesn't have yet.
   const admin = createAdminClient();
-
-  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
-  const { count: recentCount, error: countError } = await admin
-    .from("oauth_clients")
-    .select("id", { count: "exact", head: true })
-    .is("created_by", null)
-    .gte("created_at", windowStart);
-
-  if (countError) {
-    return registrationError("server_error", 500, countError.message);
-  }
-  if ((recentCount ?? 0) >= REGISTRATIONS_PER_WINDOW) {
-    return registrationError(
-      "invalid_client_metadata",
-      429,
-      "잠시 후 다시 시도해주세요."
-    );
-  }
-
   const clientSecret = generateClientSecret();
   const clientSecretHash = hashClientSecret(clientSecret);
 
