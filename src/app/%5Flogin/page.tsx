@@ -12,9 +12,9 @@ const labelClass = "mb-1.5 block text-[0.8125rem] font-semibold text-text-primar
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; redirect?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, redirect: redirectTarget } = await searchParams;
 
   return (
     <div className="flex flex-1 flex-col items-center bg-bg px-4 py-14 sm:py-16">
@@ -32,6 +32,9 @@ export default async function LoginPage({
             <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[0.8125rem] text-danger">
               이메일 또는 비밀번호가 올바르지 않아요
             </div>
+          )}
+          {redirectTarget && (
+            <input type="hidden" name="redirect" value={redirectTarget} />
           )}
           <div className="mb-4">
             <label className={labelClass}>이메일</label>

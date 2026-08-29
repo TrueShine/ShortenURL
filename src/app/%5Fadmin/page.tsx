@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, listAllUserEmails } from "@/lib/supabase/admin";
 import { AdminTabs } from "./admin-tabs";
+import { AccountsPanel } from "./accounts/page";
 
 export default async function AdminPage({
   searchParams,
@@ -38,5 +39,12 @@ export default async function AdminPage({
     );
   }
 
-  return <AdminTabs error={error} links={links ?? []} creatorEmailById={creatorEmailById} />;
+  return (
+    <AdminTabs
+      error={error}
+      links={links ?? []}
+      creatorEmailById={creatorEmailById}
+      accountsPanel={isSuperAdmin ? <AccountsPanel /> : null}
+    />
+  );
 }
