@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
 
 type McpClient = {
@@ -12,55 +12,119 @@ type McpClient = {
   revoked_at: string | null;
 };
 
-const MOCK_CLIENTS: McpClient[] = [
-  {
-    id: "mock-1",
-    name: "Claude Desktop",
-    client_id: "mcp_client_9f3a2b1c",
-    redirect_uris: ["https://claude.ai/api/mcp/auth_callback"],
-    created_at: "2026-08-20T09:12:00.000Z",
-    revoked_at: null,
-  },
-];
+const API_BASE = "/api/admin/mcp-clients";
 
 const fieldClass =
   "h-11 w-full rounded-sm border border-border bg-white px-3.5 text-[0.9375rem] text-text-primary placeholder:text-text-disabled focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/10";
 const labelClass = "mb-1.5 block text-[0.8125rem] font-semibold text-text-primary";
 
+// GET/POST/DELETE 응답 스키마는 채널 공유 스펙(id, name, client_id,
+// redirect_uris, created_at, revoked_at)만 명시하고 JSON 봉투 형태는 정하지
+//않았음 — API-Bee 라우트가 배열을 바로 주든 { clients: [...] }로 감싸든
+// 받아들이도록 방어적으로 처리한다.
+function extractClients(payload: unknown): McpClient[] {
+  if (Array.isArray(payload)) return payload as McpClient[];
+  if (payload && typeof payload === "object" && Array.isArray((payload as { clients?: unknown }).clients)) {
+    return (payload as { clients: McpClient[] }).clients;
+  }
+  return [];
+}
+
+async function parseErrorMessage(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    if (body && typeof body.error === "string") return body.error;
+  } catch {
+    // 응답이 JSON이 아니면 상태 코드로 대체
+  }
+  return `요청이 실패했어요 (HTTP ${res.status}).`;
+}
+
 export function McpClients() {
-  const [clients, setClients] = useState<McpClient[]>(MOCK_CLIENTS);
-  const [error, setError] = useState<string | null>(null);
+  const [clients, setClients] = useState<McpClient[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [registering, setRegistering] = useState(false);
   const [newSecret, setNewSecret] = useState<{ name: string; secret: string } | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<McpClient | null>(null);
+  const [revoking, setRevoking] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
-  function handleRegister(formData: FormData) {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoadError(null);
+      try {
+        const res = await fetch(API_BASE, { credentials: "same-origin" });
+        if (!res.ok) throw new Error(await parseErrorMessage(res));
+        const payload = await res.json();
+        if (!cancelled) setClients(extractClients(payload));
+      } catch (err) {
+        if (!cancelled) {
+          setClients([]);
+          setLoadError(err instanceof Error ? err.message : "클라이언트 목록을 불러오지 못했어요.");
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleRegister(formData: FormData) {
     const name = String(formData.get("name") ?? "").trim();
     const redirectUri = String(formData.get("redirect_uri") ?? "").trim();
 
     if (!name || !redirectUri) {
-      setError("이름과 redirect URI를 모두 입력해주세요.");
+      setFormError("이름과 redirect URI를 모두 입력해주세요.");
       return;
     }
 
-    setError(null);
-    const client: McpClient = {
-      id: `mock-${Date.now()}`,
-      name,
-      client_id: `mcp_client_${Math.random().toString(16).slice(2, 10)}`,
-      redirect_uris: [redirectUri],
-      created_at: new Date().toISOString(),
-      revoked_at: null,
-    };
+    setFormError(null);
+    setRegistering(true);
+    try {
+      const res = await fetch(API_BASE, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, redirect_uris: [redirectUri] }),
+      });
+      if (!res.ok) throw new Error(await parseErrorMessage(res));
 
-    setClients((prev) => [client, ...prev]);
-    setNewSecret({ name, secret: `mock_secret_${Math.random().toString(16).slice(2, 18)}` });
+      const created = await res.json();
+      setClients((prev) => [created, ...(prev ?? [])]);
+      setNewSecret({ name: created.name, secret: created.client_secret });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "클라이언트 등록에 실패했어요.");
+    } finally {
+      setRegistering(false);
+    }
   }
 
-  function handleRevoke(target: McpClient) {
-    setClients((prev) =>
-      prev.map((c) => (c.id === target.id ? { ...c, revoked_at: new Date().toISOString() } : c))
-    );
-    setRevokeTarget(null);
+  async function handleRevoke(target: McpClient) {
+    setRevoking(true);
+    setRevokeError(null);
+    try {
+      const res = await fetch(`${API_BASE}/${target.id}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      if (!res.ok) throw new Error(await parseErrorMessage(res));
+
+      setClients((prev) =>
+        (prev ?? []).map((c) =>
+          c.id === target.id ? { ...c, revoked_at: new Date().toISOString() } : c
+        )
+      );
+      setRevokeTarget(null);
+    } catch (err) {
+      setRevokeError(err instanceof Error ? err.message : "클라이언트 폐기에 실패했어요.");
+    } finally {
+      setRevoking(false);
+    }
   }
 
   return (
@@ -73,16 +137,23 @@ export function McpClients() {
           새 클라이언트 등록
         </h2>
 
-        {error && (
+        {formError && (
           <div className="mb-4 rounded-sm bg-danger-subtle px-3.5 py-3 text-[0.8125rem] text-danger">
-            {error}
+            {formError}
           </div>
         )}
 
         <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-[13.75rem] flex-1">
             <label className={labelClass}>이름</label>
-            <input name="name" type="text" required placeholder="Claude Desktop" className={fieldClass} />
+            <input
+              name="name"
+              type="text"
+              required
+              disabled={registering}
+              placeholder="Claude Desktop"
+              className={fieldClass}
+            />
           </div>
           <div className="min-w-[16.5rem] flex-1">
             <label className={labelClass}>Redirect URI</label>
@@ -90,6 +161,7 @@ export function McpClients() {
               name="redirect_uri"
               type="url"
               required
+              disabled={registering}
               placeholder="https://claude.ai/api/mcp/auth_callback"
               className={fieldClass}
             />
@@ -99,6 +171,11 @@ export function McpClients() {
       </form>
 
       <div className="mt-6 overflow-hidden rounded-md border border-border bg-surface">
+        {loadError && (
+          <div className="border-b border-border bg-danger-subtle px-4 py-3 text-[0.8125rem] text-danger">
+            {loadError}
+          </div>
+        )}
         <table className="w-full text-left text-[0.875rem]">
           <thead className="bg-surface-dim text-[0.8125rem] text-text-secondary">
             <tr>
@@ -111,7 +188,14 @@ export function McpClients() {
             </tr>
           </thead>
           <tbody>
-            {clients.map((client) => (
+            {clients === null && (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-text-disabled">
+                  불러오는 중...
+                </td>
+              </tr>
+            )}
+            {clients?.map((client) => (
               <tr key={client.id} className="border-t border-border">
                 <td className="px-4 py-3 text-text-primary">{client.name}</td>
                 <td className="px-4 py-3">
@@ -140,7 +224,10 @@ export function McpClients() {
                   <button
                     type="button"
                     disabled={!!client.revoked_at}
-                    onClick={() => setRevokeTarget(client)}
+                    onClick={() => {
+                      setRevokeError(null);
+                      setRevokeTarget(client);
+                    }}
                     className="inline-flex h-8 items-center whitespace-nowrap rounded-md border border-border bg-white px-2.5 text-xs font-medium text-danger disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     폐기
@@ -148,7 +235,7 @@ export function McpClients() {
                 </td>
               </tr>
             ))}
-            {clients.length === 0 && (
+            {clients !== null && clients.length === 0 && !loadError && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-text-disabled">
                   등록된 클라이언트가 없어요.
@@ -199,20 +286,27 @@ export function McpClients() {
               <span className="font-mono">{revokeTarget.name}</span> 클라이언트를 폐기하면 해당
               클라이언트로 발급된 토큰이 더 이상 동작하지 않아요. 되돌릴 수 없습니다.
             </p>
+            {revokeError && (
+              <div className="mt-3 rounded-sm bg-danger-subtle px-3.5 py-3 text-[0.8125rem] text-danger">
+                {revokeError}
+              </div>
+            )}
             <div className="mt-5 flex gap-2">
               <button
                 type="button"
+                disabled={revoking}
                 onClick={() => setRevokeTarget(null)}
-                className="h-11 flex-1 rounded-sm border border-border-strong text-[0.9375rem] font-semibold text-text-primary hover:border-text-primary"
+                className="h-11 flex-1 rounded-sm border border-border-strong text-[0.9375rem] font-semibold text-text-primary hover:border-text-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 취소
               </button>
               <button
                 type="button"
+                disabled={revoking}
                 onClick={() => handleRevoke(revokeTarget)}
-                className="h-11 flex-1 rounded-sm border border-danger text-[0.9375rem] font-semibold text-danger hover:bg-danger-subtle"
+                className="h-11 flex-1 rounded-sm border border-danger text-[0.9375rem] font-semibold text-danger hover:bg-danger-subtle disabled:cursor-not-allowed disabled:opacity-40"
               >
-                폐기
+                {revoking ? "폐기 중..." : "폐기"}
               </button>
             </div>
           </div>
