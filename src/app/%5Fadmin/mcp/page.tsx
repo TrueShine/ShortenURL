@@ -1,6 +1,6 @@
 import { McpClients } from "./mcp-clients";
 
-export default function McpPage() {
+export function McpPanel() {
   return (
     <div className="flex flex-col gap-6">
       <McpClients />
@@ -23,4 +23,8 @@ export default function McpPage() {
       </div>
     </div>
   );
+}
+
+export default function McpPage() {
+  return <McpPanel />;
 }

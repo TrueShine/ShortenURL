@@ -8,12 +8,7 @@ const ROLE_LABEL: Record<string, string> = {
   admin: "관리자",
 };
 
-export default async function AccountsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const { error } = await searchParams;
+export async function AccountsPanel({ error }: { error?: string } = {}) {
   const { user } = await requireSuperAdmin();
 
   const admin = createAdminClient();
@@ -89,4 +84,13 @@ export default async function AccountsPage({
       </div>
     </div>
   );
+}
+
+export default async function AccountsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  return <AccountsPanel error={error} />;
 }
