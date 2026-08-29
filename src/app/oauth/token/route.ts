@@ -11,10 +11,16 @@ import {
 
 const REFRESH_TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
+// RFC 6749 §5.1's access token response (and, defensively, the error
+// response) carries plaintext access/refresh tokens, so it must never be
+// cached by a browser or intermediate proxy — same reasoning as
+// oauth/register/route.ts's client_secret response.
+const NO_STORE_HEADERS = { "Cache-Control": "no-store", Pragma: "no-cache" };
+
 function oauthError(error: string, status: number, description?: string) {
   return NextResponse.json(
     { error, ...(description ? { error_description: description } : {}) },
-    { status }
+    { status, headers: NO_STORE_HEADERS }
   );
 }
 
@@ -176,13 +182,16 @@ export async function POST(request: Request) {
       return oauthError("server_error", 500, insertError.message);
     }
 
-    return NextResponse.json({
-      access_token: accessToken,
-      token_type: "Bearer",
-      expires_in: ACCESS_TOKEN_TTL_SECONDS,
-      refresh_token: refreshToken,
-      scope: redeemed.scope,
-    });
+    return NextResponse.json(
+      {
+        access_token: accessToken,
+        token_type: "Bearer",
+        expires_in: ACCESS_TOKEN_TTL_SECONDS,
+        refresh_token: refreshToken,
+        scope: redeemed.scope,
+      },
+      { headers: NO_STORE_HEADERS }
+    );
   }
 
   // grantType === "refresh_token"
@@ -240,11 +249,14 @@ export async function POST(request: Request) {
     return oauthError("server_error", 500, insertResult.error.message);
   }
 
-  return NextResponse.json({
-    access_token: accessToken,
-    token_type: "Bearer",
-    expires_in: ACCESS_TOKEN_TTL_SECONDS,
-    refresh_token: newRefreshToken,
-    scope: claimed.scope,
-  });
+  return NextResponse.json(
+    {
+      access_token: accessToken,
+      token_type: "Bearer",
+      expires_in: ACCESS_TOKEN_TTL_SECONDS,
+      refresh_token: newRefreshToken,
+      scope: claimed.scope,
+    },
+    { headers: NO_STORE_HEADERS }
+  );
 }
