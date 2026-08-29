@@ -41,6 +41,12 @@ export default async function AdminLayout({
             <span className="text-xl font-bold text-text-primary">내 링크</span>
           </div>
           <div className="flex items-center gap-4">
+            <Link
+              href="/_admin/mcp"
+              className="text-[0.9375rem] font-semibold text-text-secondary hover:text-text-primary"
+            >
+              MCP 연동
+            </Link>
             {isSuperAdmin && (
               <Link
                 href="/_admin/accounts"
