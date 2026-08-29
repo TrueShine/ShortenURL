@@ -1,14 +1,10 @@
-import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/admin-guard";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateClientSecret, hashClientSecret } from "@/lib/oauth/client-secret";
+import { generateClientId, isValidRedirectUri } from "@/lib/oauth/client";
 
 const MAX_CLIENT_ID_ATTEMPTS = 5;
-
-function generateClientId() {
-  return `mcp_${randomBytes(16).toString("base64url")}`;
-}
 
 export async function GET() {
   const guard = await requireAdminApi();
@@ -34,16 +30,6 @@ type CreateClientBody = {
   name?: string;
   redirect_uris?: string[];
 };
-
-function isValidRedirectUri(value: unknown): value is string {
-  if (typeof value !== "string") return false;
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(request: Request) {
   const guard = await requireAdminApi();
